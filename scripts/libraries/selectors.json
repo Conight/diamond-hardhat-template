@@ -1,0 +1,531 @@
+{
+  "0x00fdd58e": {
+    "signature": "balanceOf(address,uint256)",
+    "contracts": [
+      "ERC1155Facet",
+      "ERC6909Facet",
+      "IERC1155",
+      "IERC6909"
+    ]
+  },
+  "0x01ffc9a7": {
+    "signature": "supportsInterface(bytes4)",
+    "contracts": [
+      "AFacets",
+      "CFacets",
+      "ERC165Facet",
+      "IERC165"
+    ]
+  },
+  "0x06fdde03": {
+    "signature": "name()",
+    "contracts": [
+      "ERC20Facet",
+      "ERC721EnumerableFacet",
+      "ERC721Facet",
+      "IERC20",
+      "IERC721Enumerable",
+      "IERC721Metadata"
+    ]
+  },
+  "0x081812fc": {
+    "signature": "getApproved(uint256)",
+    "contracts": [
+      "ERC721EnumerableFacet",
+      "ERC721Facet",
+      "IERC721",
+      "IERC721Enumerable"
+    ]
+  },
+  "0x095bcdb6": {
+    "signature": "transfer(address,uint256,uint256)",
+    "contracts": [
+      "ERC6909Facet",
+      "IERC6909"
+    ]
+  },
+  "0x095ea7b3": {
+    "signature": "approve(address,uint256)",
+    "contracts": [
+      "ERC20Facet",
+      "ERC721EnumerableFacet",
+      "ERC721Facet",
+      "IERC20",
+      "IERC721",
+      "IERC721Enumerable"
+    ]
+  },
+  "0x0e89341c": {
+    "signature": "uri(uint256)",
+    "contracts": [
+      "ERC1155Facet",
+      "IERC1155"
+    ]
+  },
+  "0x150b7a02": {
+    "signature": "onERC721Received(address,address,uint256,bytes)",
+    "contracts": [
+      "IERC721Receiver"
+    ]
+  },
+  "0x18160ddd": {
+    "signature": "totalSupply()",
+    "contracts": [
+      "ERC20Facet",
+      "ERC721EnumerableFacet",
+      "IERC20",
+      "IERC721Enumerable"
+    ]
+  },
+  "0x18bf5077": {
+    "signature": "crosschainMint(address,uint256)",
+    "contracts": [
+      "ERC20BridgeableFacet"
+    ]
+  },
+  "0x1e4e0091": {
+    "signature": "setRoleAdmin(bytes32,bytes32)",
+    "contracts": [
+      "AccessControlFacet"
+    ]
+  },
+  "0x23b872dd": {
+    "signature": "transferFrom(address,address,uint256)",
+    "contracts": [
+      "ERC20Facet",
+      "ERC721EnumerableFacet",
+      "ERC721Facet",
+      "IERC20",
+      "IERC721",
+      "IERC721Enumerable"
+    ]
+  },
+  "0x248a9ca3": {
+    "signature": "getRoleAdmin(bytes32)",
+    "contracts": [
+      "AccessControlFacet"
+    ]
+  },
+  "0x2a55205a": {
+    "signature": "royaltyInfo(uint256,uint256)",
+    "contracts": [
+      "IERC2981",
+      "RoyaltyFacet"
+    ]
+  },
+  "0x2b8c49e3": {
+    "signature": "crosschainBurn(address,uint256)",
+    "contracts": [
+      "ERC20BridgeableFacet"
+    ]
+  },
+  "0x2eb2c2d6": {
+    "signature": "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)",
+    "contracts": [
+      "ERC1155Facet",
+      "IERC1155"
+    ]
+  },
+  "0x2f2ff15d": {
+    "signature": "grantRole(bytes32,address)",
+    "contracts": [
+      "AccessControlFacet"
+    ]
+  },
+  "0x2f745c59": {
+    "signature": "tokenOfOwnerByIndex(address,uint256)",
+    "contracts": [
+      "ERC721EnumerableFacet",
+      "IERC721Enumerable"
+    ]
+  },
+  "0x313ce567": {
+    "signature": "decimals()",
+    "contracts": [
+      "ERC20Facet",
+      "IERC20"
+    ]
+  },
+  "0x3644e515": {
+    "signature": "DOMAIN_SEPARATOR()",
+    "contracts": [
+      "ERC20PermitFacet",
+      "IERC20"
+    ]
+  },
+  "0x36568abe": {
+    "signature": "renounceRole(bytes32,address)",
+    "contracts": [
+      "AccessControlFacet"
+    ]
+  },
+  "0x426a8493": {
+    "signature": "approve(address,uint256,uint256)",
+    "contracts": [
+      "ERC6909Facet",
+      "IERC6909"
+    ]
+  },
+  "0x42842e0e": {
+    "signature": "safeTransferFrom(address,address,uint256)",
+    "contracts": [
+      "ERC721EnumerableFacet",
+      "ERC721Facet",
+      "IERC721",
+      "IERC721Enumerable"
+    ]
+  },
+  "0x42966c68": {
+    "signature": "burn(uint256)",
+    "contracts": [
+      "ERC20BurnFacet",
+      "ERC721BurnFacet",
+      "ERC721EnumerableBurnFacet",
+      "IERC20"
+    ]
+  },
+  "0x453f4e22": {
+    "signature": "cFunc3()",
+    "contracts": [
+      "CFacets"
+    ]
+  },
+  "0x4e1273f4": {
+    "signature": "balanceOfBatch(address[],uint256[])",
+    "contracts": [
+      "ERC1155Facet",
+      "IERC1155"
+    ]
+  },
+  "0x52ef6b2c": {
+    "signature": "facetAddresses()",
+    "contracts": [
+      "DiamondLoupeFacet"
+    ]
+  },
+  "0x558a7297": {
+    "signature": "setOperator(address,bool)",
+    "contracts": [
+      "ERC6909Facet",
+      "IERC6909"
+    ]
+  },
+  "0x598af9e7": {
+    "signature": "allowance(address,address,uint256)",
+    "contracts": [
+      "ERC6909Facet",
+      "IERC6909"
+    ]
+  },
+  "0x60b5befb": {
+    "signature": "functionFacetPairs()",
+    "contracts": [
+      "DiamondInspectFacet"
+    ]
+  },
+  "0x6352211e": {
+    "signature": "ownerOf(uint256)",
+    "contracts": [
+      "ERC721EnumerableFacet",
+      "ERC721Facet",
+      "IERC721",
+      "IERC721Enumerable"
+    ]
+  },
+  "0x63786229": {
+    "signature": "requireRoleNotPaused(bytes32,address)",
+    "contracts": [
+      "AccessControlPausableFacet"
+    ]
+  },
+  "0x70a08231": {
+    "signature": "balanceOf(address)",
+    "contracts": [
+      "ERC20Facet",
+      "ERC721EnumerableFacet",
+      "ERC721Facet",
+      "IERC20",
+      "IERC721",
+      "IERC721Enumerable"
+    ]
+  },
+  "0x715018a6": {
+    "signature": "renounceOwnership()",
+    "contracts": [
+      "OwnerFacet",
+      "OwnerTwoStepsFacet"
+    ]
+  },
+  "0x79ba5097": {
+    "signature": "acceptOwnership()",
+    "contracts": [
+      "OwnerTwoStepsFacet"
+    ]
+  },
+  "0x79cc6790": {
+    "signature": "burnFrom(address,uint256)",
+    "contracts": [
+      "ERC20BurnFacet",
+      "IERC20"
+    ]
+  },
+  "0x7a0ed627": {
+    "signature": "facets()",
+    "contracts": [
+      "DiamondLoupeFacet"
+    ]
+  },
+  "0x7a55c396": {
+    "signature": "cFunc1()",
+    "contracts": [
+      "CFacets"
+    ]
+  },
+  "0x7ecebe00": {
+    "signature": "nonces(address)",
+    "contracts": [
+      "ERC20PermitFacet",
+      "IERC20"
+    ]
+  },
+  "0x8274760b": {
+    "signature": "upgradeDiamond((address,bytes4[])[],(address,bytes4[])[],bytes4[],address,bytes,bytes32,bytes)",
+    "contracts": [
+      "DiamondUpgradeFacet"
+    ]
+  },
+  "0x82f51fa6": {
+    "signature": "revokeRoleBatch(bytes32,address[])",
+    "contracts": [
+      "AccessControlFacet"
+    ]
+  },
+  "0x8da5cb5b": {
+    "signature": "owner()",
+    "contracts": [
+      "IERC173",
+      "OwnerFacet",
+      "OwnerTwoStepsFacet"
+    ]
+  },
+  "0x91d14854": {
+    "signature": "hasRole(bytes32,address)",
+    "contracts": [
+      "AccessControlFacet"
+    ]
+  },
+  "0x92c6ae91": {
+    "signature": "revokeTemporalRole(bytes32,address)",
+    "contracts": [
+      "AccessControlTemporalFacet"
+    ]
+  },
+  "0x95d89b41": {
+    "signature": "symbol()",
+    "contracts": [
+      "ERC20Facet",
+      "ERC721EnumerableFacet",
+      "ERC721Facet",
+      "IERC20",
+      "IERC721Enumerable",
+      "IERC721Metadata"
+    ]
+  },
+  "0xa22cb465": {
+    "signature": "setApprovalForAll(address,bool)",
+    "contracts": [
+      "ERC1155Facet",
+      "ERC721EnumerableFacet",
+      "ERC721Facet",
+      "IERC1155",
+      "IERC721",
+      "IERC721Enumerable"
+    ]
+  },
+  "0xa9059cbb": {
+    "signature": "transfer(address,uint256)",
+    "contracts": [
+      "ERC20Facet",
+      "IERC20"
+    ]
+  },
+  "0xadfca15e": {
+    "signature": "facetFunctionSelectors(address)",
+    "contracts": [
+      "DiamondLoupeFacet"
+    ]
+  },
+  "0xb32f970d": {
+    "signature": "pauseRole(bytes32)",
+    "contracts": [
+      "AccessControlPausableFacet"
+    ]
+  },
+  "0xb6363cf2": {
+    "signature": "isOperator(address,address)",
+    "contracts": [
+      "ERC6909Facet",
+      "IERC6909"
+    ]
+  },
+  "0xb6de6071": {
+    "signature": "isRolePaused(bytes32)",
+    "contracts": [
+      "AccessControlPausableFacet"
+    ]
+  },
+  "0xb88d4fde": {
+    "signature": "safeTransferFrom(address,address,uint256,bytes)",
+    "contracts": [
+      "ERC721EnumerableFacet",
+      "ERC721Facet",
+      "IERC721",
+      "IERC721Enumerable"
+    ]
+  },
+  "0xbba0d760": {
+    "signature": "checkTokenBridge(address)",
+    "contracts": [
+      "ERC20BridgeableFacet"
+    ]
+  },
+  "0xbc197c81": {
+    "signature": "onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)",
+    "contracts": [
+      "IERC1155Receiver"
+    ]
+  },
+  "0xbd6758cd": {
+    "signature": "isRoleExpired(bytes32,address)",
+    "contracts": [
+      "AccessControlTemporalFacet"
+    ]
+  },
+  "0xc87b56dd": {
+    "signature": "tokenURI(uint256)",
+    "contracts": [
+      "ERC721EnumerableFacet",
+      "ERC721Facet",
+      "IERC721Metadata"
+    ]
+  },
+  "0xcae26161": {
+    "signature": "requireValidRole(bytes32,address)",
+    "contracts": [
+      "AccessControlTemporalFacet"
+    ]
+  },
+  "0xcdffacc6": {
+    "signature": "facetAddress(bytes4)",
+    "contracts": [
+      "DiamondInspectFacet"
+    ]
+  },
+  "0xd09a20c5": {
+    "signature": "requireRole(bytes32,address)",
+    "contracts": [
+      "AccessControlFacet"
+    ]
+  },
+  "0xd186f4a7": {
+    "signature": "unpauseRole(bytes32)",
+    "contracts": [
+      "AccessControlPausableFacet"
+    ]
+  },
+  "0xd505accf": {
+    "signature": "permit(address,address,uint256,uint256,uint8,bytes32,bytes32)",
+    "contracts": [
+      "ERC20PermitFacet",
+      "IERC20"
+    ]
+  },
+  "0xd547741f": {
+    "signature": "revokeRole(bytes32,address)",
+    "contracts": [
+      "AccessControlFacet"
+    ]
+  },
+  "0xd63d709d": {
+    "signature": "getRoleExpiry(bytes32,address)",
+    "contracts": [
+      "AccessControlTemporalFacet"
+    ]
+  },
+  "0xdd464dad": {
+    "signature": "aFunc1()",
+    "contracts": [
+      "AFacets"
+    ]
+  },
+  "0xdd62ed3e": {
+    "signature": "allowance(address,address)",
+    "contracts": [
+      "ERC20Facet",
+      "IERC20"
+    ]
+  },
+  "0xe1451486": {
+    "signature": "cFunc2()",
+    "contracts": [
+      "CFacets"
+    ]
+  },
+  "0xe30c3978": {
+    "signature": "pendingOwner()",
+    "contracts": [
+      "OwnerTwoStepsFacet"
+    ]
+  },
+  "0xe985e9c5": {
+    "signature": "isApprovedForAll(address,address)",
+    "contracts": [
+      "ERC1155Facet",
+      "ERC721EnumerableFacet",
+      "ERC721Facet",
+      "IERC1155",
+      "IERC721",
+      "IERC721Enumerable"
+    ]
+  },
+  "0xeead2b6d": {
+    "signature": "grantRoleWithExpiry(bytes32,address,uint256)",
+    "contracts": [
+      "AccessControlTemporalFacet"
+    ]
+  },
+  "0xf23a6e61": {
+    "signature": "onERC1155Received(address,address,uint256,uint256,bytes)",
+    "contracts": [
+      "IERC1155Receiver"
+    ]
+  },
+  "0xf242432a": {
+    "signature": "safeTransferFrom(address,address,uint256,uint256,bytes)",
+    "contracts": [
+      "ERC1155Facet",
+      "IERC1155"
+    ]
+  },
+  "0xf2fde38b": {
+    "signature": "transferOwnership(address)",
+    "contracts": [
+      "IERC173",
+      "OwnerFacet",
+      "OwnerTwoStepsFacet"
+    ]
+  },
+  "0xfd47852b": {
+    "signature": "grantRoleBatch(bytes32,address[])",
+    "contracts": [
+      "AccessControlFacet"
+    ]
+  },
+  "0xfe99049a": {
+    "signature": "transferFrom(address,address,uint256,uint256)",
+    "contracts": [
+      "ERC6909Facet",
+      "IERC6909"
+    ]
+  }
+}
