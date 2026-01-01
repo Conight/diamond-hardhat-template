@@ -26,19 +26,19 @@ export const deployDiamond = async (
   await changes.deploy(viem);
 
   // deploy Diamond
-  const diamondArtifact = await artifacts.readArtifact("FluxDiamond");
+  const diamondArtifact = await artifacts.readArtifact("ExampleDiamond");
   const hash = await deployWallet.deployContract({
     abi: diamondArtifact.abi,
     bytecode: diamondArtifact.bytecode as `0x${string}`,
     args: [changes.getAddFunctions(), deployWallet.account.address],
   });
 
-  console.log(`FluxDiamond deploy hash: ${hash}`);
+  console.log(`${diamondArtifact.contractName} deploy hash: ${hash}`);
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
   if (!receipt.contractAddress) {
-    throw new Error("FluxDiamond deployment failed");
+    throw new Error(`${diamondArtifact.contractName} deployment failed`);
   }
 
   changes.saveDeployment(receipt, networkName);
