@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.30;
 
+/* Compose
+ * https://compose.diamonds
+ */
+
 contract ERC20BurnFacet {
     /**
      * @notice Thrown when an account has insufficient balance for a transfer or burn.
@@ -29,13 +33,13 @@ contract ERC20BurnFacet {
     /**
      * @dev Storage position determined by the keccak256 hash of the diamond storage identifier.
      */
-    bytes32 constant STORAGE_POSITION = keccak256("compose.erc20");
+    bytes32 constant STORAGE_POSITION = keccak256("compose.erc20.transfer");
 
     /**
      * @dev ERC-8042 compliant storage struct for ERC20 token data.
-     * @custom:storage-location erc8042:compose.erc20
+     * @custom:storage-location erc8042:compose.erc20.transfer
      */
-    struct ERC20Storage {
+    struct ERC20TransferStorage {
         mapping(address owner => uint256 balance) balanceOf;
         uint256 totalSupply;
         mapping(address owner => mapping(address spender => uint256 allowance)) allowance;
@@ -46,7 +50,7 @@ contract ERC20BurnFacet {
      * @dev Uses inline assembly to set the storage slot reference.
      * @return s The ERC20 storage struct reference.
      */
-    function getStorage() internal pure returns (ERC20Storage storage s) {
+    function getStorage() internal pure returns (ERC20TransferStorage storage s) {
         bytes32 position = STORAGE_POSITION;
         assembly {
             s.slot := position
@@ -59,7 +63,7 @@ contract ERC20BurnFacet {
      * @param _value The amount of tokens to burn.
      */
     function burn(uint256 _value) external {
-        ERC20Storage storage s = getStorage();
+        ERC20TransferStorage storage s = getStorage();
         uint256 balance = s.balanceOf[msg.sender];
         if (balance < _value) {
             revert ERC20InsufficientBalance(msg.sender, balance, _value);
@@ -78,7 +82,7 @@ contract ERC20BurnFacet {
      * @param _value The amount of tokens to burn.
      */
     function burnFrom(address _account, uint256 _value) external {
-        ERC20Storage storage s = getStorage();
+        ERC20TransferStorage storage s = getStorage();
         uint256 currentAllowance = s.allowance[_account][msg.sender];
         if (currentAllowance < _value) {
             revert ERC20InsufficientAllowance(msg.sender, currentAllowance, _value);

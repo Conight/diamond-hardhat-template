@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.30;
 
+/* Compose
+ * https://compose.diamonds
+ */
+
 import "../DiamondMod.sol" as DiamondMod;
 import "../../access/Owner/OwnerMod.sol" as OwnerMod;
 import "../../token/ERC721/ERC721/ERC721Mod.sol" as ERC721Mod;
@@ -23,10 +27,7 @@ contract ExampleDiamond {
      * @param _facets Array of facet addresses and their corresponding function selectors to add to the diamond.
      * @param _diamondOwner Address that will be set as the owner of the diamond contract.
      */
-    constructor(
-        DiamondMod.FacetFunctions[] memory _facets,
-        address _diamondOwner
-    ) {
+    constructor(DiamondMod.FacetFunctions[] memory _facets, address _diamondOwner) {
         DiamondMod.addFacets(_facets);
 
         /*************************************
@@ -40,11 +41,7 @@ contract ExampleDiamond {
         /**
          * Setting ERC721 token details
          */
-        ERC721Mod.setMetadata({
-            _name: "ExampleDiamondNFT",
-            _symbol: "EDN",
-            _baseURI: "https://example.com/metadata/"
-        });
+        ERC721Mod.setMetadata({_name: "ExampleDiamondNFT", _symbol: "EDN", _baseURI: "https://example.com/metadata/"});
         /**
          * Registering ERC165 interfaces
          */

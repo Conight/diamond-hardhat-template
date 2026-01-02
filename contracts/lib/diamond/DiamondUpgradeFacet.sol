@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.30;
 
+/* Compose
+ * https://compose.diamonds
+ */
+
 /**
  * @title Reference implementation for upgrade function for
  *        ERC-8109 Diamonds, Simplified
@@ -58,11 +62,7 @@ contract DiamondUpgradeFacet {
         bytes4[] selectors;
     }
 
-    function getDiamondStorage()
-        internal
-        pure
-        returns (DiamondStorage storage s)
-    {
+    function getDiamondStorage() internal pure returns (DiamondStorage storage s) {
         bytes32 position = DIAMOND_STORAGE_POSITION;
         assembly {
             s.slot := position
@@ -75,10 +75,7 @@ contract DiamondUpgradeFacet {
      * @param _selector The function selector being added.
      * @param _facet    The facet address that will handle calls to `_selector`.
      */
-    event DiamondFunctionAdded(
-        bytes4 indexed _selector,
-        address indexed _facet
-    );
+    event DiamondFunctionAdded(bytes4 indexed _selector, address indexed _facet);
 
     /**
      * @notice Emitted when changing the facet that will handle calls to a function.
@@ -87,11 +84,7 @@ contract DiamondUpgradeFacet {
      * @param _oldFacet The facet address previously responsible for `_selector`.
      * @param _newFacet The facet address that will now handle calls to `_selector`.
      */
-    event DiamondFunctionReplaced(
-        bytes4 indexed _selector,
-        address indexed _oldFacet,
-        address indexed _newFacet
-    );
+    event DiamondFunctionReplaced(bytes4 indexed _selector, address indexed _oldFacet, address indexed _newFacet);
 
     /**
      * @notice Emitted when a function is removed from a diamond.
@@ -99,10 +92,7 @@ contract DiamondUpgradeFacet {
      * @param _selector The function selector being removed.
      * @param _oldFacet The facet address that previously handled `_selector`.
      */
-    event DiamondFunctionRemoved(
-        bytes4 indexed _selector,
-        address indexed _oldFacet
-    );
+    event DiamondFunctionRemoved(bytes4 indexed _selector, address indexed _oldFacet);
 
     /**
      * @notice Emitted when a diamond's constructor function or function from a
@@ -139,10 +129,7 @@ contract DiamondUpgradeFacet {
     error CannotReplaceImmutableFunction(bytes4 _selector);
     error CannotRemoveImmutableFunction(bytes4 _selector);
 
-    function addFunctions(
-        address _facet,
-        bytes4[] calldata _functionSelectors
-    ) internal {
+    function addFunctions(address _facet, bytes4[] calldata _functionSelectors) internal {
         DiamondStorage storage s = getDiamondStorage();
         if (_facet.code.length == 0) {
             revert NoBytecodeAtAddress(_facet);
@@ -151,30 +138,20 @@ contract DiamondUpgradeFacet {
             revert NoSelectorsProvidedForFacet(_facet);
         }
         uint32 selectorPosition = uint32(s.selectors.length);
-        for (
-            uint256 selectorIndex;
-            selectorIndex < _functionSelectors.length;
-            selectorIndex++
-        ) {
+        for (uint256 selectorIndex; selectorIndex < _functionSelectors.length; selectorIndex++) {
             bytes4 selector = _functionSelectors[selectorIndex];
             address oldFacet = s.facetAndPosition[selector].facet;
             if (oldFacet != address(0)) {
                 revert CannotAddFunctionToDiamondThatAlreadyExists(selector);
             }
-            s.facetAndPosition[selector] = FacetAndPosition(
-                _facet,
-                selectorPosition
-            );
+            s.facetAndPosition[selector] = FacetAndPosition(_facet, selectorPosition);
             s.selectors.push(selector);
             selectorPosition++;
             emit DiamondFunctionAdded(selector, _facet);
         }
     }
 
-    function replaceFunctions(
-        address _facet,
-        bytes4[] calldata _functionSelectors
-    ) internal {
+    function replaceFunctions(address _facet, bytes4[] calldata _functionSelectors) internal {
         DiamondStorage storage s = getDiamondStorage();
         if (_facet.code.length == 0) {
             revert NoBytecodeAtAddress(_facet);
@@ -182,11 +159,7 @@ contract DiamondUpgradeFacet {
         if (_functionSelectors.length == 0) {
             revert NoSelectorsProvidedForFacet(_facet);
         }
-        for (
-            uint256 selectorIndex;
-            selectorIndex < _functionSelectors.length;
-            selectorIndex++
-        ) {
+        for (uint256 selectorIndex; selectorIndex < _functionSelectors.length; selectorIndex++) {
             bytes4 selector = _functionSelectors[selectorIndex];
             address oldFacet = s.facetAndPosition[selector].facet;
             if (oldFacet == address(this)) {
@@ -209,15 +182,9 @@ contract DiamondUpgradeFacet {
     function removeFunctions(bytes4[] calldata _functionSelectors) internal {
         DiamondStorage storage s = getDiamondStorage();
         uint256 selectorCount = s.selectors.length;
-        for (
-            uint256 selectorIndex;
-            selectorIndex < _functionSelectors.length;
-            selectorIndex++
-        ) {
+        for (uint256 selectorIndex; selectorIndex < _functionSelectors.length; selectorIndex++) {
             bytes4 selector = _functionSelectors[selectorIndex];
-            FacetAndPosition memory oldFacetAndPosition = s.facetAndPosition[
-                selector
-            ];
+            FacetAndPosition memory oldFacetAndPosition = s.facetAndPosition[selector];
             address oldFacet = oldFacetAndPosition.facet;
             if (oldFacet == address(this)) {
                 revert CannotRemoveImmutableFunction(selector);
@@ -232,8 +199,7 @@ contract DiamondUpgradeFacet {
             if (oldFacetAndPosition.position != selectorCount) {
                 bytes4 lastSelector = s.selectors[selectorCount];
                 s.selectors[oldFacetAndPosition.position] = lastSelector;
-                s.facetAndPosition[lastSelector].position = oldFacetAndPosition
-                    .position;
+                s.facetAndPosition[lastSelector].position = oldFacetAndPosition.position;
             }
             /**
              * delete last selector
@@ -304,24 +270,19 @@ contract DiamondUpgradeFacet {
             addFunctions(_addFunctions[i].facet, _addFunctions[i].selectors);
         }
         for (uint256 i; i < _replaceFunctions.length; i++) {
-            replaceFunctions(
-                _replaceFunctions[i].facet,
-                _replaceFunctions[i].selectors
-            );
+            replaceFunctions(_replaceFunctions[i].facet, _replaceFunctions[i].selectors);
         }
         removeFunctions(_removeFunctions);
         if (_delegate != address(0)) {
             if (_delegate.code.length == 0) {
                 revert NoBytecodeAtAddress(_delegate);
             }
-            (bool success, bytes memory error) = _delegate.delegatecall(
-                _functionCall
-            );
+            (bool success, bytes memory error) = _delegate.delegatecall(_functionCall);
             if (!success) {
                 if (error.length > 0) {
                     /*
-                     * bubble up error
-                     */
+                    * bubble up error
+                    */
                     assembly ("memory-safe") {
                         revert(add(error, 0x20), mload(error))
                     }

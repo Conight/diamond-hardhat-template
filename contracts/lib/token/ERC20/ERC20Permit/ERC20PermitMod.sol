@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.30;
 
+/* Compose
+ * https://compose.diamonds
+ */
+
 /*
  * @title   LibERC20Permit — Library for ERC-2612 Permit Logic
  * @notice  Library for self-contained ERC-2612 permit and domain separator logic and storage
@@ -35,21 +39,35 @@ error ERC20InvalidSpender(address _spender);
  */
 event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 
-bytes32 constant ERC20_STORAGE_POSITION = keccak256("compose.erc20");
+bytes32 constant ERC20_METADATA_STORAGE_POSITION = keccak256("compose.erc20.metadata");
 
 /**
- * @custom:storage-location erc8042:compose.erc20
+ * @custom:storage-location erc8042:compose.erc20.metadata
  */
-struct ERC20Storage {
-    mapping(address owner => uint256 balance) balanceOf;
-    uint256 totalSupply;
-    mapping(address owner => mapping(address spender => uint256 allowance)) allowance;
-    uint8 decimals;
+struct ERC20MetadataStorage {
     string name;
 }
 
-function getERC20Storage() pure returns (ERC20Storage storage s) {
-    bytes32 position = ERC20_STORAGE_POSITION;
+function getERC20MetadataStorage() pure returns (ERC20MetadataStorage storage s) {
+    bytes32 position = ERC20_METADATA_STORAGE_POSITION;
+    assembly {
+        s.slot := position
+    }
+}
+
+bytes32 constant ERC20_TRANSFER_STORAGE_POSITION = keccak256("compose.erc20.transfer");
+
+/**
+ * @custom:storage-location erc8042:compose.erc20.transfer
+ */
+struct ERC20TransferStorage {
+    mapping(address owner => uint256 balance) balanceOf;
+    uint256 totalSupply;
+    mapping(address owner => mapping(address spender => uint256 allowance)) allowance;
+}
+
+function getERC20TransferStorage() pure returns (ERC20TransferStorage storage s) {
+    bytes32 position = ERC20_TRANSFER_STORAGE_POSITION;
     assembly {
         s.slot := position
     }
@@ -84,7 +102,7 @@ function DOMAIN_SEPARATOR() view returns (bytes32) {
     return keccak256(
         abi.encode(
             keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-            keccak256(bytes(getERC20Storage().name)),
+            keccak256(bytes(getERC20MetadataStorage().name)),
             keccak256("1"),
             block.chainid,
             thisAddress
@@ -110,7 +128,7 @@ function permit(address _owner, address _spender, uint256 _value, uint256 _deadl
     }
 
     ERC20PermitStorage storage s = getPermitStorage();
-    ERC20Storage storage sERC20 = getERC20Storage();
+    ERC20TransferStorage storage erc20Transfer = getERC20TransferStorage();
     uint256 currentNonce = s.nonces[_owner];
     bytes32 structHash = keccak256(
         abi.encode(
@@ -132,7 +150,7 @@ function permit(address _owner, address _spender, uint256 _value, uint256 _deadl
             keccak256(
                 abi.encode(
                     keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-                    keccak256(bytes(sERC20.name)),
+                    keccak256(bytes(getERC20MetadataStorage().name)),
                     keccak256("1"),
                     block.chainid,
                     thisAddress
@@ -147,7 +165,7 @@ function permit(address _owner, address _spender, uint256 _value, uint256 _deadl
         revert ERC2612InvalidSignature(_owner, _spender, _value, _deadline, _v, _r, _s);
     }
 
-    sERC20.allowance[_owner][_spender] = _value;
+    erc20Transfer.allowance[_owner][_spender] = _value;
     s.nonces[_owner] = currentNonce + 1;
     emit Approval(_owner, _spender, _value);
 }
