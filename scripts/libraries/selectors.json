@@ -11,8 +11,6 @@
   "0x01ffc9a7": {
     "signature": "supportsInterface(bytes4)",
     "contracts": [
-      "AFacets",
-      "CFacets",
       "ERC165Facet",
       "IERC165"
     ]
@@ -71,6 +69,7 @@
   "0x18160ddd": {
     "signature": "totalSupply()",
     "contracts": [
+      "CustomNFTFacet",
       "ERC20Facet",
       "ERC721EnumerableFacet",
       "IERC20",
@@ -184,12 +183,6 @@
       "IERC20"
     ]
   },
-  "0x453f4e22": {
-    "signature": "cFunc3()",
-    "contracts": [
-      "CFacets"
-    ]
-  },
   "0x4e1273f4": {
     "signature": "balanceOfBatch(address[],uint256[])",
     "contracts": [
@@ -238,6 +231,12 @@
       "AccessControlPausableFacet"
     ]
   },
+  "0x6a627842": {
+    "signature": "mint(address)",
+    "contracts": [
+      "CustomNFTFacet"
+    ]
+  },
   "0x70a08231": {
     "signature": "balanceOf(address)",
     "contracts": [
@@ -273,12 +272,6 @@
     "signature": "facets()",
     "contracts": [
       "DiamondLoupeFacet"
-    ]
-  },
-  "0x7a55c396": {
-    "signature": "cFunc1()",
-    "contracts": [
-      "CFacets"
     ]
   },
   "0x7ecebe00": {
@@ -452,23 +445,11 @@
       "AccessControlTemporalFacet"
     ]
   },
-  "0xdd464dad": {
-    "signature": "aFunc1()",
-    "contracts": [
-      "AFacets"
-    ]
-  },
   "0xdd62ed3e": {
     "signature": "allowance(address,address)",
     "contracts": [
       "ERC20Facet",
       "IERC20"
-    ]
-  },
-  "0xe1451486": {
-    "signature": "cFunc2()",
-    "contracts": [
-      "CFacets"
     ]
   },
   "0xe30c3978": {
