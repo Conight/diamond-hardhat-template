@@ -10,7 +10,7 @@ A sophisticated, production-ready template for building modular and upgradeable 
   - Perform a "diff" between local facets and the deployed Diamond.
   - Provide a visual summary (table) of planned changes (Added/Replaced/Removed/Ignored).
   - Require manual confirmation before executing on-chain transactions.
-- **Deployment Tracking**: Automatically saves detailed deployment records (addresses, hashes, facet cuts) in the `deployment/` directory.
+- **Deployment Tracking**: Automatically saves detailed deployment records (addresses, hashes, facet functions) in the `deployment/` directory.
 - **Viem Integration**: Powered by Viem for fast, lightweight, and type-safe interactions with the Ethereum blockchain.
 
 ## 🛠 Project Structure
@@ -74,7 +74,7 @@ npx hardhat run scripts/deploy.ts --network <your-network>
 
 ### Upgrading the Diamond
 
-The upgrade script automatically detects changes in your facets and prepares a `diamondCut` transaction.
+The upgrade script automatically detects changes in your facets and prepares a `upgradeDiamond` transaction.
 
 ```bash
 npx hardhat run scripts/upgrade.ts --network <your-network>
