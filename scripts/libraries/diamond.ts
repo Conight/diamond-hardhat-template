@@ -263,7 +263,7 @@ export class DiamondChanges {
       networkName,
       diamondContract
     );
-    const facetCut = await this.#getFacets();
+    const facetFunctions = await this.#getFacets();
 
     let deployment: any;
 
@@ -271,7 +271,7 @@ export class DiamondChanges {
       // Upgrade existing deployment
       const deployed = await fs.readFile(outputPath, "utf-8");
       deployment = JSON.parse(deployed);
-      deployment.facetCut = facetCut;
+      deployment.functions = facetFunctions;
     } else {
       // New deployment
       if (!diamondDeployReceipt) {
@@ -282,7 +282,7 @@ export class DiamondChanges {
 
       deployment = {
         diamond: diamondDeployReceipt.contractAddress,
-        facetCut,
+        functions: facetFunctions,
         owner: diamondDeployReceipt.from,
         blockNumber: diamondDeployReceipt.blockNumber,
         blockHash: diamondDeployReceipt.blockHash,
@@ -450,8 +450,17 @@ export class DiamondChanges {
     // Determine functions to remove
     if (previous) {
       for (const { selector } of previous) {
+        console.log(
+          "allNewSelectors.has(selector):",
+          allNewSelectors.has(selector),
+          "selector:",
+          selector,
+          "previous:",
+          previous
+        );
         if (
           !allNewSelectors.has(selector) &&
+          // this.#needsIncluded(signature) &&
           !(await this.#isDiamondSpecSelector(selector))
         ) {
           removeFunctions.add(selector);
@@ -483,10 +492,15 @@ export class DiamondChanges {
       const selector = toFunctionSelector(signature);
 
       if (this.#needsIncluded(signature)) {
+        // For functions that need to be included in the diamond
         const exists = previous?.some((item) => item.selector === selector);
         (exists ? diff.replace : diff.add).push(selector);
-      } else {
+      } else if (previous) {
+        // For ignored functions: only mark as ignored if upgrading existing deployment
         diff.ignored.push(selector);
+      } else {
+        // For new deployments: include all functions even if they're normally ignored
+        diff.add.push(selector);
       }
     }
 
@@ -503,8 +517,8 @@ export class DiamondChanges {
   /**
    * Check if signature should be included
    */
-  static #needsIncluded(signature: AbiFunction): boolean {
-    return !SIGNATURES_TO_IGNORE.has(toFunctionSignature(signature));
+  static #needsIncluded(abiFunction: AbiFunction): boolean {
+    return !SIGNATURES_TO_IGNORE.has(toFunctionSignature(abiFunction));
   }
 
   /**

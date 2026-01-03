@@ -9,6 +9,7 @@ const main = async () => {
     "DiamondUpgradeFacet",
     "DiamondInspectFacet",
     "OwnerFacet",
+    "ERC165Facet",
     "ERC721Facet",
     "ERC721BurnFacet",
     "CustomNFTFacet",

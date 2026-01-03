@@ -19,6 +19,7 @@
     "signature": "name()",
     "contracts": [
       "ERC20Facet",
+      "ERC20MetadataFacet",
       "ERC721EnumerableFacet",
       "ERC721Facet",
       "IERC20",
@@ -46,6 +47,7 @@
     "signature": "approve(address,uint256)",
     "contracts": [
       "ERC20Facet",
+      "ERC20TransferFacet",
       "ERC721EnumerableFacet",
       "ERC721Facet",
       "IERC20",
@@ -71,6 +73,7 @@
     "contracts": [
       "CustomNFTFacet",
       "ERC20Facet",
+      "ERC20TransferFacet",
       "ERC721EnumerableFacet",
       "IERC20",
       "IERC721Enumerable"
@@ -92,6 +95,7 @@
     "signature": "transferFrom(address,address,uint256)",
     "contracts": [
       "ERC20Facet",
+      "ERC20TransferFacet",
       "ERC721EnumerableFacet",
       "ERC721Facet",
       "IERC20",
@@ -142,6 +146,7 @@
     "signature": "decimals()",
     "contracts": [
       "ERC20Facet",
+      "ERC20MetadataFacet",
       "IERC20"
     ]
   },
@@ -241,6 +246,7 @@
     "signature": "balanceOf(address)",
     "contracts": [
       "ERC20Facet",
+      "ERC20TransferFacet",
       "ERC721EnumerableFacet",
       "ERC721Facet",
       "IERC20",
@@ -317,6 +323,7 @@
     "signature": "symbol()",
     "contracts": [
       "ERC20Facet",
+      "ERC20MetadataFacet",
       "ERC721EnumerableFacet",
       "ERC721Facet",
       "IERC20",
@@ -339,6 +346,7 @@
     "signature": "transfer(address,uint256)",
     "contracts": [
       "ERC20Facet",
+      "ERC20TransferFacet",
       "IERC20"
     ]
   },
@@ -449,6 +457,7 @@
     "signature": "allowance(address,address)",
     "contracts": [
       "ERC20Facet",
+      "ERC20TransferFacet",
       "IERC20"
     ]
   },
