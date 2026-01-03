@@ -1,6 +1,6 @@
 # Diamond Hardhat Template
 
-A sophisticated, production-ready template for building modular and upgradeable smart contracts using the **Diamond Standard (EIP-2535) & (EIP-8109)**. This project is built with **Hardhat**, **Viem**.
+A sophisticated, production-ready template for building modular and upgradeable smart contracts using the **Diamond Standard (EIP-2535/EIP-8109)**. This project is built with **Hardhat**, **Viem**.
 
 ---
 
@@ -14,7 +14,7 @@ A sophisticated, production-ready template for building modular and upgradeable 
 >
 > 1. **[Perfect-Abstractions/Compose](https://github.com/Perfect-Abstractions/Compose)** - The primary implementation reference and architectural foundation for this template.
 >
-> 2. **[Nick Mudge (@mudgen)](https://github.com/mudgen)** - Creator of the Diamond Standard (EIP-2535 / EIP-8109) and the original Diamond implementations.
+> 2. **[Nick Mudge (@mudgen)](https://github.com/mudgen)** - Creator of the Diamond Standard (EIP-2535/EIP-8109) and the original Diamond implementations.
 >
 > This template merely provides a **Hardhat integration layer** with deployment scripts and developer tooling around their exceptional work. All fundamental concepts, patterns, and the majority of the smart contract logic originate from the above sources.
 >
