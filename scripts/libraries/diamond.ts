@@ -450,14 +450,6 @@ export class DiamondChanges {
     // Determine functions to remove
     if (previous) {
       for (const { selector } of previous) {
-        console.log(
-          "allNewSelectors.has(selector):",
-          allNewSelectors.has(selector),
-          "selector:",
-          selector,
-          "previous:",
-          previous
-        );
         if (
           !allNewSelectors.has(selector) &&
           // this.#needsIncluded(signature) &&
