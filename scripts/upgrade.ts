@@ -6,9 +6,9 @@ const main = async () => {
 
   const diamondName = "CustomNFTDiamond";
   const facets = [
-    // "DiamondUpgradeFacet",
-    // "DiamondInspectFacet",
-    // "OwnerFacet",
+    "DiamondUpgradeFacet",
+    "DiamondInspectFacet",
+    "OwnerFacet",
     "ERC165Facet",
     "ERC721Facet",
     "ERC721BurnFacet",
