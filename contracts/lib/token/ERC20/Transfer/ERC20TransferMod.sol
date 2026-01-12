@@ -6,8 +6,8 @@ pragma solidity >=0.8.30;
  */
 
 /*
- * @title LibERC20 — ERC-20 Library
- * @notice Provides internal functions and storage layout for ERC-20 token logic.
+ * @title ERC20TransferMod
+ * @notice Provides transfer internal functions for ERC-20 tokens.
  * @dev Uses ERC-8042 for storage location standardization and ERC-6093 for error conventions.
  */
 
@@ -64,13 +64,13 @@ event Approval(address indexed _owner, address indexed _spender, uint256 _value)
 /*
  * @notice Storage slot identifier, defined using keccak256 hash of the library diamond storage identifier.
  */
-bytes32 constant STORAGE_POSITION = keccak256("compose.erc20.transfer");
+bytes32 constant STORAGE_POSITION = keccak256("erc20");
 
 /*
  * @notice ERC-20 storage layout using the ERC-8042 standard.
- * @custom:storage-location erc8042:compose.erc20.transfer
+ * @custom:storage-location erc8042:erc20
  */
-struct ERC20TransferStorage {
+struct ERC20Storage {
     mapping(address owner => uint256 balance) balanceOf;
     uint256 totalSupply;
     mapping(address owner => mapping(address spender => uint256 allowance)) allowance;
@@ -81,49 +81,11 @@ struct ERC20TransferStorage {
  * @dev Uses inline assembly to bind the storage struct to the fixed storage position.
  * @return s The ERC-20 storage struct.
  */
-function getStorage() pure returns (ERC20TransferStorage storage s) {
+function getStorage() pure returns (ERC20Storage storage s) {
     bytes32 position = STORAGE_POSITION;
     assembly {
         s.slot := position
     }
-}
-
-/**
- * @notice Mints new tokens to a specified address.
- * @dev Increases both total supply and the recipient's balance.
- * @param _account The address receiving the newly minted tokens.
- * @param _value The number of tokens to mint.
- */
-function mint(address _account, uint256 _value) {
-    ERC20TransferStorage storage s = getStorage();
-    if (_account == address(0)) {
-        revert ERC20InvalidReceiver(address(0));
-    }
-    s.totalSupply += _value;
-    s.balanceOf[_account] += _value;
-    emit Transfer(address(0), _account, _value);
-}
-
-/**
- * @notice Burns tokens from a specified address.
- * @dev Decreases both total supply and the sender's balance.
- * @param _account The address whose tokens will be burned.
- * @param _value The number of tokens to burn.
- */
-function burn(address _account, uint256 _value) {
-    ERC20TransferStorage storage s = getStorage();
-    if (_account == address(0)) {
-        revert ERC20InvalidSender(address(0));
-    }
-    uint256 accountBalance = s.balanceOf[_account];
-    if (accountBalance < _value) {
-        revert ERC20InsufficientBalance(_account, accountBalance, _value);
-    }
-    unchecked {
-        s.balanceOf[_account] = accountBalance - _value;
-        s.totalSupply -= _value;
-    }
-    emit Transfer(_account, address(0), _value);
 }
 
 /**
@@ -132,10 +94,9 @@ function burn(address _account, uint256 _value) {
  * @param _from The address to send tokens from.
  * @param _to The address to send tokens to.
  * @param _value The number of tokens to transfer.
- * @return True if the transfer was successful.
  */
-function transferFrom(address _from, address _to, uint256 _value) returns (bool) {
-    ERC20TransferStorage storage s = getStorage();
+function transferFrom(address _from, address _to, uint256 _value) {
+    ERC20Storage storage s = getStorage();
     if (_from == address(0)) {
         revert ERC20InvalidSender(address(0));
     }
@@ -158,7 +119,6 @@ function transferFrom(address _from, address _to, uint256 _value) returns (bool)
     }
     s.balanceOf[_to] += _value;
     emit Transfer(_from, _to, _value);
-    return true;
 }
 
 /**
@@ -166,10 +126,9 @@ function transferFrom(address _from, address _to, uint256 _value) returns (bool)
  * @dev Updates balances directly without allowance mechanism.
  * @param _to The address to send tokens to.
  * @param _value The number of tokens to transfer.
- * @return True if the transfer was successful.
  */
-function transfer(address _to, uint256 _value) returns (bool) {
-    ERC20TransferStorage storage s = getStorage();
+function transfer(address _to, uint256 _value) {
+    ERC20Storage storage s = getStorage();
     if (_to == address(0)) {
         revert ERC20InvalidReceiver(address(0));
     }
@@ -182,22 +141,5 @@ function transfer(address _to, uint256 _value) returns (bool) {
     }
     s.balanceOf[_to] += _value;
     emit Transfer(msg.sender, _to, _value);
-    return true;
 }
 
-/**
- * @notice Approves a spender to transfer tokens on behalf of the caller.
- * @dev Sets the allowance for the spender.
- * @param _spender The address to approve for spending.
- * @param _value The amount of tokens to approve.
- * @return True if the approval was successful.
- */
-function approve(address _spender, uint256 _value) returns (bool) {
-    if (_spender == address(0)) {
-        revert ERC20InvalidSpender(address(0));
-    }
-    ERC20TransferStorage storage s = getStorage();
-    s.allowance[msg.sender][_spender] = _value;
-    emit Approval(msg.sender, _spender, _value);
-    return true;
-}

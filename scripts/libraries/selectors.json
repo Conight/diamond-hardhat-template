@@ -18,10 +18,9 @@
   "0x06fdde03": {
     "signature": "name()",
     "contracts": [
-      "ERC20Facet",
       "ERC20MetadataFacet",
       "ERC721EnumerableFacet",
-      "ERC721Facet",
+      "ERC721MetadataFacet",
       "IERC20",
       "IERC721Enumerable",
       "IERC721Metadata"
@@ -30,8 +29,8 @@
   "0x081812fc": {
     "signature": "getApproved(uint256)",
     "contracts": [
+      "ERC721DataFacet",
       "ERC721EnumerableFacet",
-      "ERC721Facet",
       "IERC721",
       "IERC721Enumerable"
     ]
@@ -46,10 +45,9 @@
   "0x095ea7b3": {
     "signature": "approve(address,uint256)",
     "contracts": [
-      "ERC20Facet",
-      "ERC20TransferFacet",
+      "ERC20ApproveFacet",
+      "ERC721ApproveFacet",
       "ERC721EnumerableFacet",
-      "ERC721Facet",
       "IERC20",
       "IERC721",
       "IERC721Enumerable"
@@ -72,8 +70,7 @@
     "signature": "totalSupply()",
     "contracts": [
       "CustomNFTFacet",
-      "ERC20Facet",
-      "ERC20TransferFacet",
+      "ERC20DataFacet",
       "ERC721EnumerableFacet",
       "IERC20",
       "IERC721Enumerable"
@@ -94,10 +91,9 @@
   "0x23b872dd": {
     "signature": "transferFrom(address,address,uint256)",
     "contracts": [
-      "ERC20Facet",
       "ERC20TransferFacet",
       "ERC721EnumerableFacet",
-      "ERC721Facet",
+      "ERC721TransferFacet",
       "IERC20",
       "IERC721",
       "IERC721Enumerable"
@@ -145,7 +141,6 @@
   "0x313ce567": {
     "signature": "decimals()",
     "contracts": [
-      "ERC20Facet",
       "ERC20MetadataFacet",
       "IERC20"
     ]
@@ -174,7 +169,7 @@
     "signature": "safeTransferFrom(address,address,uint256)",
     "contracts": [
       "ERC721EnumerableFacet",
-      "ERC721Facet",
+      "ERC721TransferFacet",
       "IERC721",
       "IERC721Enumerable"
     ]
@@ -193,6 +188,12 @@
     "contracts": [
       "ERC1155Facet",
       "IERC1155"
+    ]
+  },
+  "0x4f6ccce7": {
+    "signature": "tokenByIndex(uint256)",
+    "contracts": [
+      "ERC721EnumerableFacet"
     ]
   },
   "0x52ef6b2c": {
@@ -224,8 +225,8 @@
   "0x6352211e": {
     "signature": "ownerOf(uint256)",
     "contracts": [
+      "ERC721DataFacet",
       "ERC721EnumerableFacet",
-      "ERC721Facet",
       "IERC721",
       "IERC721Enumerable"
     ]
@@ -245,10 +246,9 @@
   "0x70a08231": {
     "signature": "balanceOf(address)",
     "contracts": [
-      "ERC20Facet",
-      "ERC20TransferFacet",
+      "ERC20DataFacet",
+      "ERC721DataFacet",
       "ERC721EnumerableFacet",
-      "ERC721Facet",
       "IERC20",
       "IERC721",
       "IERC721Enumerable"
@@ -322,10 +322,9 @@
   "0x95d89b41": {
     "signature": "symbol()",
     "contracts": [
-      "ERC20Facet",
       "ERC20MetadataFacet",
       "ERC721EnumerableFacet",
-      "ERC721Facet",
+      "ERC721MetadataFacet",
       "IERC20",
       "IERC721Enumerable",
       "IERC721Metadata"
@@ -335,8 +334,8 @@
     "signature": "setApprovalForAll(address,bool)",
     "contracts": [
       "ERC1155Facet",
+      "ERC721ApproveFacet",
       "ERC721EnumerableFacet",
-      "ERC721Facet",
       "IERC1155",
       "IERC721",
       "IERC721Enumerable"
@@ -345,7 +344,6 @@
   "0xa9059cbb": {
     "signature": "transfer(address,uint256)",
     "contracts": [
-      "ERC20Facet",
       "ERC20TransferFacet",
       "IERC20"
     ]
@@ -379,7 +377,7 @@
     "signature": "safeTransferFrom(address,address,uint256,bytes)",
     "contracts": [
       "ERC721EnumerableFacet",
-      "ERC721Facet",
+      "ERC721TransferFacet",
       "IERC721",
       "IERC721Enumerable"
     ]
@@ -406,7 +404,7 @@
     "signature": "tokenURI(uint256)",
     "contracts": [
       "ERC721EnumerableFacet",
-      "ERC721Facet",
+      "ERC721MetadataFacet",
       "IERC721Metadata"
     ]
   },
@@ -456,8 +454,7 @@
   "0xdd62ed3e": {
     "signature": "allowance(address,address)",
     "contracts": [
-      "ERC20Facet",
-      "ERC20TransferFacet",
+      "ERC20DataFacet",
       "IERC20"
     ]
   },
@@ -471,8 +468,8 @@
     "signature": "isApprovedForAll(address,address)",
     "contracts": [
       "ERC1155Facet",
+      "ERC721DataFacet",
       "ERC721EnumerableFacet",
-      "ERC721Facet",
       "IERC1155",
       "IERC721",
       "IERC721Enumerable"

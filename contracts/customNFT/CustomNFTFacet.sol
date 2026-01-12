@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.30;
 
-import "lib/token/ERC721/ERC721/ERC721Mod.sol" as ERC721Mod;
+import "lib/token/ERC721/Mint/ERC721MintMod.sol" as ERC721MintMod;
 
 /**
  * @title CustomNFTFacet
@@ -56,7 +56,7 @@ contract CustomNFTFacet {
         uint256 tokenId = s.totalSupply;
 
         // Mint the token
-        ERC721Mod.mint(to, tokenId);
+        ERC721MintMod.mint(to, tokenId);
 
         // Update supply (safe to use unchecked as overflow is practically impossible)
         unchecked {

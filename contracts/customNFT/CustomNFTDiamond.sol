@@ -3,10 +3,11 @@ pragma solidity >=0.8.30;
 
 import "lib/diamond/DiamondMod.sol" as DiamondMod;
 import "lib/access/Owner/OwnerMod.sol" as OwnerMod;
-import "lib/token/ERC721/ERC721/ERC721Mod.sol" as ERC721Mod;
+import "lib/token/ERC721/Metadata/ERC721MetadataMod.sol" as ERC721MetadataMod;
 import "lib/interfaceDetection/ERC165/ERC165Mod.sol" as ERC165Mod;
 import {IERC721} from "lib/interfaces/IERC721.sol";
 import {IERC721Metadata} from "lib/interfaces/IERC721Metadata.sol";
+import {IERC721Receiver} from "lib/interfaces/IERC721Receiver.sol";
 
 contract CustomNFTDiamond {
     /**
@@ -40,7 +41,7 @@ contract CustomNFTDiamond {
         /**
          * Setting ERC721 token details
          */
-        ERC721Mod.setMetadata({
+        ERC721MetadataMod.setMetadata({
             _name: "CustomNFT",
             _symbol: "cNFT",
             _baseURI: "https://example.com/metadata/"
@@ -50,6 +51,7 @@ contract CustomNFTDiamond {
          */
         ERC165Mod.registerInterface(type(IERC721).interfaceId);
         ERC165Mod.registerInterface(type(IERC721Metadata).interfaceId);
+        ERC165Mod.registerInterface(type(IERC721Receiver).interfaceId);
     }
 
     fallback() external payable {

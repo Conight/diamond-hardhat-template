@@ -6,20 +6,16 @@ pragma solidity >=0.8.30;
  */
 
 /*
- *  /// @title LibERC20Bridgeable — ERC-7802 Library
- */
-/*
- *  /// @notice Provides internal functions and storage layout for ERC-7802 token logic.
- */
-/**
- *  /// @dev Uses ERC-8042 for storage location standardization and ERC-6093 for error conventions
+ * @title LibERC20Bridgeable — ERC-7802 Library
+ * @notice Provides internal functions and storage layout for ERC-7802 token logic.
+ * @dev Uses ERC-8042 for storage location standardization and ERC-6093 for error conventions
  */
 
 /**
  * @notice Revert when a provided receiver is invalid(e.g,zero address) .
- * @param _receiver The invalid reciever address.
+ * @param _receiver The invalid receiver address.
  */
-error ERC20InvalidReciever(address _receiver);
+error ERC20InvalidReceiver(address _receiver);
 
 /**
  * @notice Thrown when the sender address is invalid (e.g., zero address).
@@ -84,13 +80,13 @@ event Transfer(address indexed _from, address indexed _to, uint256 _value);
  * @notice Storage slot for ERC-20 token using ERC8042 for storage location standardization
  * @dev Storage position determined by the keccak256 hash of the diamond storage identifier.
  */
-bytes32 constant ERC20_TRANSFER_STORAGE_POSITION = keccak256("compose.erc20.transfer");
+bytes32 constant ERC20_STORAGE_POSITION = keccak256("erc20");
 
 /**
  * @dev ERC-8042 compliant storage struct for ERC20 token data.
- * @custom:storage-location erc8042:compose.erc20.transfer
+ * @custom:storage-location erc8042:erc20
  */
-struct ERC20TransferStorage {
+struct ERC20Storage {
     mapping(address owner => uint256 balance) balanceOf;
     uint256 totalSupply;
 }
@@ -100,8 +96,8 @@ struct ERC20TransferStorage {
  * @return s The ERC20 storage struct reference.
  */
 
-function getERC20TransferStorage() pure returns (ERC20TransferStorage storage s) {
-    bytes32 position = ERC20_TRANSFER_STORAGE_POSITION;
+function getERC20Storage() pure returns (ERC20Storage storage s) {
+    bytes32 position = ERC20_STORAGE_POSITION;
     assembly {
         s.slot := position
     }
@@ -141,7 +137,7 @@ function getAccessControlStorage() pure returns (AccessControlStorage storage s)
  * @param _value The amount to mint.
  */
 function crosschainMint(address _account, uint256 _value) {
-    ERC20TransferStorage storage erc20Transfer = getERC20TransferStorage();
+    ERC20Storage storage erc20Storage = getERC20Storage();
 
     AccessControlStorage storage acs = getAccessControlStorage();
 
@@ -153,12 +149,12 @@ function crosschainMint(address _account, uint256 _value) {
     }
 
     if (_account == address(0)) {
-        revert ERC20InvalidReciever(address(0));
+        revert ERC20InvalidReceiver(address(0));
     }
 
     unchecked {
-        erc20Transfer.totalSupply += _value;
-        erc20Transfer.balanceOf[_account] += _value;
+        erc20Storage.totalSupply += _value;
+        erc20Storage.balanceOf[_account] += _value;
     }
 
     emit Transfer(address(0), _account, _value);
@@ -171,7 +167,7 @@ function crosschainMint(address _account, uint256 _value) {
  * @param _value The amount to burn.
  */
 function crosschainBurn(address _from, uint256 _value) {
-    ERC20TransferStorage storage erc20Transfer = getERC20TransferStorage();
+    ERC20Storage storage erc20Storage = getERC20Storage();
 
     AccessControlStorage storage acs = getAccessControlStorage();
 
@@ -183,18 +179,18 @@ function crosschainBurn(address _from, uint256 _value) {
     }
 
     if (_from == address(0)) {
-        revert ERC20InvalidReciever(address(0));
+        revert ERC20InvalidReceiver(address(0));
     }
 
-    uint256 accountBalance = erc20Transfer.balanceOf[_from];
+    uint256 accountBalance = erc20Storage.balanceOf[_from];
 
     if (accountBalance < _value) {
         revert ERC20InsufficientBalance(_from, accountBalance, _value);
     }
 
     unchecked {
-        erc20Transfer.totalSupply -= _value;
-        erc20Transfer.balanceOf[_from] -= _value;
+        erc20Storage.totalSupply -= _value;
+        erc20Storage.balanceOf[_from] -= _value;
     }
     emit Transfer(_from, address(0), _value);
     emit CrosschainBurn(_from, _value, msg.sender);

@@ -1,0 +1,24 @@
+{
+  "diamond": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+  "functions": [
+    {
+      "selector": "0x8274760b",
+      "signature": "upgradeDiamond((address,bytes4[])[],(address,bytes4[])[],bytes4[],address,bytes,bytes32,bytes)",
+      "contract": "DiamondUpgradeFacet"
+    }
+  ],
+  "owner": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+  "blockNumber": "2",
+  "blockHash": "0xb90b0993f6db70f35ed6c3d1a2b5b170564f803e09a9e2de5554c714024d74fb",
+  "facets": {
+    "DiamondUpgradeFacet": {
+      "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+      "blockNumber": "1",
+      "blockHash": "0x4ab6f91d839eb389134013d912ccccbc6c958735c6e7a50ad31dcd1f29cc02f6",
+      "transactionHash": "0x6db00d2d00ae2b3b7bf51e46f2a9fba24322fd6f741d50e79ca6ec752f11d244",
+      "transactionIndex": 0,
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+    }
+  },
+  "upgradeHistory": []
+}

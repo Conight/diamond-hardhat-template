@@ -96,7 +96,7 @@ export class DiamondChanges {
     selectorDiffs: Map<string, SelectorDiff>,
     removeFunctions: Set<HashString>,
     upgradeMode: boolean = false,
-    deployment?: DiamondDeployment
+    deployment?: DiamondDeployment,
   ) {
     this.#viem = viem;
     this.#networkName = networkName;
@@ -125,7 +125,7 @@ export class DiamondChanges {
   public getRemoveFunctions(): HashString[] {
     if (!this.#upgradeMode) {
       throw new Error(
-        "DiamondChanges must be constructed with previous functions to find removals"
+        "DiamondChanges must be constructed with previous functions to find removals",
       );
     }
     return Array.from(this.#removeFunctions);
@@ -140,7 +140,7 @@ export class DiamondChanges {
    * Eliminates code duplication between getAddFunctions and getReplaceFunctions
    */
   #getChangedFunctions(
-    type: Exclude<FunctionType, "ignored">
+    type: Exclude<FunctionType, "ignored">,
   ): ChangedFunctions[] {
     const result: ChangedFunctions[] = [];
 
@@ -150,8 +150,8 @@ export class DiamondChanges {
 
       result.push(
         this.#deployed
-          ? { facet: diff.facet, selectors }
-          : { contractName, facet: diff.facet, selectors }
+          ? { contractName, facet: diff.facet, selectors }
+          : { facet: diff.facet, selectors },
       );
     }
 
@@ -161,7 +161,7 @@ export class DiamondChanges {
   /** Build deployment receipt for a selector */
   async #buildDeploymentReceipt(
     contractName: string,
-    selector: HashString
+    selector: HashString,
   ): Promise<DeploymentReceipt> {
     const { signature } = await this.#lookupSelector(selector);
     return { selector, signature, contract: contractName };
@@ -170,13 +170,13 @@ export class DiamondChanges {
   /** Get deployment path for a diamond contract */
   static #getDeploymentPath(
     networkName: string,
-    diamondContract: string
+    diamondContract: string,
   ): string {
     return path.join(
       hre.config.paths.root,
       "deployment",
       networkName,
-      `${diamondContract}.json`
+      `${diamondContract}.json`,
     );
   }
 
@@ -200,6 +200,39 @@ export class DiamondChanges {
 
     let diamondAddress: Address;
 
+    console.log("Deploying facets");
+
+    for (const [contractName, diff] of this.#selectorDiffs) {
+      if (diff.add.length + diff.replace.length === 0) {
+        continue;
+      }
+      console.log(
+        `  - Deploying ${contractName} with ${diff.add.length} selector(s)`,
+      );
+
+      const artifact = await artifacts.readArtifact(contractName);
+      const hash = await deployWallet.deployContract({
+        abi: artifact.abi,
+        bytecode: artifact.bytecode as HashString,
+        args: [],
+      });
+
+      console.log(`    ${contractName} deploy hash: ${hash}`);
+
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+      if (!receipt.contractAddress) {
+        throw new Error(`${contractName} deployment failed`);
+      }
+
+      // Update facet address
+      diff.facet = receipt.contractAddress;
+      this.#deployedContracts.set(contractName, receipt);
+
+      console.log(`  ✓ ${contractName} deployed: ${receipt.contractAddress}`);
+    }
+    console.log("Facets deployed");
+
     if (!this.#upgradeMode) {
       // Deploy Diamond contract
       const artifact = await artifacts.readArtifact(this.#diamondName);
@@ -222,46 +255,13 @@ export class DiamondChanges {
       await this.saveDeployment(receipt);
       diamondAddress = receipt.contractAddress;
     } else {
-      console.log("Deploying facets");
-
-      for (const [contractName, diff] of this.#selectorDiffs) {
-        if (diff.add.length + diff.replace.length === 0) {
-          continue;
-        }
-        console.log(
-          `  - Deploying ${contractName} with ${diff.add.length} selector(s)`
-        );
-
-        const artifact = await artifacts.readArtifact(contractName);
-        const hash = await deployWallet.deployContract({
-          abi: artifact.abi,
-          bytecode: artifact.bytecode as HashString,
-          args: [],
-        });
-
-        console.log(`    ${contractName} deploy hash: ${hash}`);
-
-        const receipt = await publicClient.waitForTransactionReceipt({ hash });
-
-        if (!receipt.contractAddress) {
-          throw new Error(`${contractName} deployment failed`);
-        }
-
-        // Update facet address
-        diff.facet = receipt.contractAddress;
-        this.#deployedContracts.set(contractName, receipt);
-
-        console.log(`  ✓ ${contractName} deployed: ${receipt.contractAddress}`);
-      }
-
-      console.log("Facets deployed");
       diamondAddress = this.#deployment!.diamond;
 
       if (this.#deployedContracts.size > 0) {
         // Execute upgrade
         const diamondUpgrade = await this.#viem.getContractAt(
           "DiamondUpgradeFacet",
-          diamondAddress
+          diamondAddress,
         );
 
         const tx = await diamondUpgrade.write.upgradeDiamond([
@@ -278,7 +278,7 @@ export class DiamondChanges {
           hash: tx,
         });
         console.log(
-          `${this.#diamondName} upgrade with hash: ${receipt.transactionHash}`
+          `${this.#diamondName} upgrade with hash: ${receipt.transactionHash}`,
         );
 
         await this.saveDeployment();
@@ -291,7 +291,7 @@ export class DiamondChanges {
   }
 
   #getDeployedFacets(
-    existingFacets?: Record<string, DeploymentFacet>
+    existingFacets?: Record<string, DeploymentFacet>,
   ): Record<string, DeploymentFacet> {
     const facets: Record<string, DeploymentFacet> = existingFacets ?? {};
 
@@ -313,18 +313,18 @@ export class DiamondChanges {
 
   /** Save deployment information to file */
   public async saveDeployment(
-    diamondDeployReceipt?: GetTransactionReceiptReturnType
+    diamondDeployReceipt?: GetTransactionReceiptReturnType,
   ): Promise<void> {
     const outputDir = path.join(
       hre.config.paths.root,
       "deployment",
-      this.#networkName
+      this.#networkName,
     );
     await fs.mkdir(outputDir, { recursive: true });
 
     const outputPath = DiamondChanges.#getDeploymentPath(
       this.#networkName,
-      this.#diamondName
+      this.#diamondName,
     );
     const facetFunctions = await this.#getFacets();
 
@@ -347,7 +347,7 @@ export class DiamondChanges {
       // New deployment
       if (!diamondDeployReceipt) {
         throw new Error(
-          "Diamond deployment receipt is required for new deployments"
+          "Diamond deployment receipt is required for new deployments",
         );
       }
 
@@ -364,7 +364,7 @@ export class DiamondChanges {
 
     await fs.writeFile(
       outputPath,
-      JSON.stringify(deployment, this.#jsonReplacer, 2)
+      JSON.stringify(deployment, this.#jsonReplacer, 2),
     );
 
     console.log(`\n💾 Deployment file saved to: ${outputPath}`);
@@ -384,14 +384,14 @@ export class DiamondChanges {
         diff.replace,
         "Replaced",
         chalk.green,
-        facet
+        facet,
       );
       await this.#addTableRows(
         table,
         diff.ignored,
         "Ignored",
         chalk.gray,
-        facet
+        facet,
       );
     }
 
@@ -413,7 +413,7 @@ export class DiamondChanges {
 
     console.log(table.toString());
     return this.#promptUser(
-      "Review the table of Diamond changes. Proceed with upgrade? yN "
+      "Review the table of Diamond changes. Proceed with upgrade? yN ",
     );
   }
 
@@ -437,8 +437,8 @@ export class DiamondChanges {
       const selectors = [...diff.add, ...diff.replace];
       const receipts = await Promise.all(
         selectors.map((selector) =>
-          this.#buildDeploymentReceipt(contractName, selector)
-        )
+          this.#buildDeploymentReceipt(contractName, selector),
+        ),
       );
 
       facets.push(...receipts);
@@ -457,7 +457,7 @@ export class DiamondChanges {
     selectors: readonly HashString[],
     action: string,
     colorFn: (str: string) => string,
-    contractName: string
+    contractName: string,
   ): Promise<void> {
     for (const selector of selectors) {
       const info = await this.#lookupSelector(selector);
@@ -510,7 +510,7 @@ export class DiamondChanges {
     networkName: string,
     diamondName: string,
     facets: readonly string[],
-    upgradeMode: boolean = false
+    upgradeMode: boolean = false,
   ): Promise<DiamondChanges> {
     const selectorDiffs = new Map<string, SelectorDiff>();
     const removeFunctions = new Set<HashString>();
@@ -524,11 +524,11 @@ export class DiamondChanges {
       const diamondAddress = deployment!.diamond;
 
       // Get current facets
-      const diamondLoupe = await viem.getContractAt(
+      const diamondInspect = await viem.getContractAt(
         "DiamondInspectFacet",
-        diamondAddress
+        diamondAddress,
       );
-      previousFacets = await diamondLoupe.read.functionFacetPairs();
+      previousFacets = await diamondInspect.read.functionFacetPairs();
     }
 
     // Process each facet
@@ -541,9 +541,11 @@ export class DiamondChanges {
       };
       let onchainBytecode: HashString | undefined = undefined;
       if (upgradeMode) {
-        onchainBytecode = await publicClient.getCode({
-          address: deployment!.facets[facet]!.address as Address,
-        });
+        onchainBytecode = deployment!.facets[facet]
+          ? await publicClient.getCode({
+              address: deployment!.facets[facet]!.address as Address,
+            })
+          : undefined;
       }
 
       const artifact = await artifacts.readArtifact(facet);
@@ -567,7 +569,7 @@ export class DiamondChanges {
         }
 
         const exists = previousFacets?.some(
-          (item) => item.selector === selector
+          (item) => item.selector === selector,
         );
         (exists ? diff.replace : diff.add).push(selector);
       }
@@ -581,7 +583,7 @@ export class DiamondChanges {
       selectorDiffs,
       removeFunctions,
       upgradeMode,
-      deployment
+      deployment,
     );
   }
 
@@ -598,14 +600,14 @@ export class DiamondChanges {
 /** Load deployment configuration from file */
 export async function loadDeployment(
   networkName: string,
-  diamondContract: string
+  diamondContract: string,
 ): Promise<DiamondDeployment> {
   try {
     const deploymentPath = path.join(
       hre.config.paths.root,
       "deployment",
       networkName,
-      `${diamondContract}.json`
+      `${diamondContract}.json`,
     );
     const content = await fs.readFile(deploymentPath, "utf-8");
     return JSON.parse(content) as DiamondDeployment;
@@ -619,7 +621,7 @@ export async function deployDiamond(
   viem: ViemConnection,
   networkName: string,
   diamondName: string,
-  facets: readonly string[]
+  facets: readonly string[],
 ): Promise<Address | undefined> {
   await hre.tasks.getTask("selectors").run();
 
@@ -629,7 +631,7 @@ export async function deployDiamond(
     viem,
     networkName,
     diamondName,
-    facets
+    facets,
   );
   const shouldDeploy = await changes.verify();
 
@@ -648,7 +650,7 @@ export async function upgradeDiamond(
   viem: ViemConnection,
   networkName: string,
   diamondName: string,
-  facets: readonly string[]
+  facets: readonly string[],
 ): Promise<Address | undefined> {
   await hre.tasks.getTask("selectors").run();
 
@@ -660,7 +662,7 @@ export async function upgradeDiamond(
     networkName,
     diamondName,
     facets,
-    true
+    true,
   );
   const shouldUpgrade = await changes.verify();
 
