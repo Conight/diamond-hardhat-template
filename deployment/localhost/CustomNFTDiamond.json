@@ -1,5 +1,5 @@
 {
-  "diamond": "0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1",
+  "diamond": "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
   "functions": [
     {
       "selector": "0x8274760b",
@@ -82,8 +82,13 @@
       "contract": "ERC721ApproveFacet"
     },
     {
-      "selector": "0x42966c68",
-      "signature": "burn(uint256)",
+      "selector": "0x3cb9f1d8",
+      "signature": "burnERC721(uint256)",
+      "contract": "ERC721BurnFacet"
+    },
+    {
+      "selector": "0xa2e144c2",
+      "signature": "burnERC721s(uint256[])",
       "contract": "ERC721BurnFacet"
     },
     {
@@ -98,78 +103,78 @@
     }
   ],
   "owner": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
-  "blockNumber": "23",
-  "blockHash": "0xd4289e0e811aff2f3340da625580bf6ebf18d5c6bf45d0b871e550e6628eb65e",
+  "blockNumber": "10",
+  "blockHash": "0x44570a1e28f150338700b9464798b3cfa356a40ec9bb56f203e1529566eba859",
   "facets": {
     "DiamondUpgradeFacet": {
-      "address": "0x0dcd1bf9a1b36ce34237eeafef220932846bcd82",
-      "blockNumber": "14",
-      "blockHash": "0xc1818b13b57fe06d3221edd311f3893f89c7665f7e04fb0ed61624c3f431b5f3",
-      "transactionHash": "0x116ec0a471670ea58f0587f212b289e5d2923f268ea33bc190c462725cf0cc03",
+      "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+      "blockNumber": "1",
+      "blockHash": "0xd03e952311b262395d56869a06df363a5ad1f2682e48b6fbe12e4bc02ff9e9a3",
+      "transactionHash": "0x6db00d2d00ae2b3b7bf51e46f2a9fba24322fd6f741d50e79ca6ec752f11d244",
       "transactionIndex": 0,
       "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
     },
     "DiamondInspectFacet": {
-      "address": "0x9a676e781a523b5d0c0e43731313a708cb607508",
-      "blockNumber": "15",
-      "blockHash": "0x4c5eff242ba33f250d4825d44f86ffc2ef764cd53620fabd6d3722dc931d6cdf",
-      "transactionHash": "0xe58b6144aad5288c842d95d8c3147efd2e96f6dfe28f26bb7a43b28d56bb01f0",
+      "address": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+      "blockNumber": "2",
+      "blockHash": "0x461c3389ca7cbb6a2b67020fda0e34aa7b0e7d146da74e8f8254f3d05bb19d76",
+      "transactionHash": "0xb1e8684cba8044754918788e7a1393776aeeb8b1750f4095dcfbde602a80224c",
       "transactionIndex": 0,
       "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
     },
     "OwnerFacet": {
-      "address": "0x0b306bf915c4d645ff596e518faf3f9669b97016",
-      "blockNumber": "16",
-      "blockHash": "0x0a09aa7c55892c45ad2312321fd672b95e77153964990216f37acb4243729c9f",
-      "transactionHash": "0xc5e58690421f3482f0d43ffe2248318977342f3845fe072b8deb7679c6bc16ae",
+      "address": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+      "blockNumber": "3",
+      "blockHash": "0xc0fbc336038cd62630bbb59090844f8e72a14ad2b7f95e458f3028a422a9b0af",
+      "transactionHash": "0x2bad6629aa7246af838a928ac63627f3e3e01aef0752421ea3c30a378b3a4329",
       "transactionIndex": 0,
       "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
     },
     "ERC165Facet": {
-      "address": "0x959922be3caee4b8cd9a407cc3ac1c251c2007b1",
-      "blockNumber": "17",
-      "blockHash": "0x885d6b7ff980a627526de2e56c03e9122180a5b9a252549e81a3b55caffac5c2",
-      "transactionHash": "0xb50338bc4f91641d306d5a6ad94725dfa0b5e5c9ca35898fd09ac486b52b04ed",
+      "address": "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9",
+      "blockNumber": "4",
+      "blockHash": "0xb18f3dfd5bf97c413a65f880a5b7e7a045dabc628d2241930c4a4f38cf8ad9c0",
+      "transactionHash": "0x74f6cbd65c362efabc2ebc5ca778aca2213f13ec82db9716a008db80a84a22b8",
       "transactionIndex": 0,
       "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
     },
     "ERC721TransferFacet": {
-      "address": "0x9a9f2ccfde556a7e9ff0848998aa4a0cfd8863ae",
-      "blockNumber": "18",
-      "blockHash": "0x8c160ede1ab57442fa0b4c465aa73fe4a6c28244631e60dc68a4c3920bf9a31c",
-      "transactionHash": "0xcec982611f678bd8f900e67c666c692e1854b1ee5f55cf1c44787a7d4aa3b7d2",
+      "address": "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9",
+      "blockNumber": "5",
+      "blockHash": "0x637e13f7cf90144df4b54bee6878616ed048e1f2ce17141ccdb61e8373d41ccc",
+      "transactionHash": "0xb6085b84e5d46fd57ac5fec0ea305f85a721e4c60854e7a6b96736c80de0f592",
       "transactionIndex": 0,
       "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
     },
     "ERC721DataFacet": {
-      "address": "0x68b1d87f95878fe05b998f19b66f4baba5de1aed",
-      "blockNumber": "19",
-      "blockHash": "0x071a1357572c45210b4db4ea37281ac03e87b2b9a22f76fc272535c9a56c09ca",
-      "transactionHash": "0x9d65db05f5b74ac293cbd4f4e1521e313d9abe3c1c306b6fa8ae752780115b5b",
+      "address": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+      "blockNumber": "6",
+      "blockHash": "0x72ce1ed3beb843c01467c86b4acde09afcfe116dd71a14f38340308c9a871c30",
+      "transactionHash": "0x3d5c5e6ec4a764acd13c7d7b95a464061d3123d1ff196ce551f9519730e7cc2a",
       "transactionIndex": 0,
       "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
     },
     "ERC721ApproveFacet": {
-      "address": "0x3aa5ebb10dc797cac828524e59a333d0a371443c",
-      "blockNumber": "20",
-      "blockHash": "0xdff340805a8a1c5e629a1870e73725ae93224925ae638b849e74cba5db5ac0be",
-      "transactionHash": "0x721576e7bc350e008bd0ef9d0df48629aefb15b0855fc662ac68f908876ac432",
+      "address": "0x0165878a594ca255338adfa4d48449f69242eb8f",
+      "blockNumber": "7",
+      "blockHash": "0x9e16cc2b4ae158945c6a1e07966419c649e773c3ce03e143d9aa80cf3b2f3ccd",
+      "transactionHash": "0xd36bec865e5dcf0689dc59828a1081b56335c7b7a6dc32f2af105a6835c700bc",
       "transactionIndex": 0,
       "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
     },
     "ERC721BurnFacet": {
-      "address": "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
-      "blockNumber": "21",
-      "blockHash": "0x1ca71209885f15c4c1fbe5e4216b31d9aa90fee5fdd17c4cb76337a788a4cc4c",
-      "transactionHash": "0x1d4fce8c5574381330c8eb033961fa5a3cf171b5ff71e862b1215a1e20605ba2",
+      "address": "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+      "blockNumber": "8",
+      "blockHash": "0x04329e833b6ca486f11b2122f95ef620bba1d11a65e5877cc9563dc2be0a1cc1",
+      "transactionHash": "0x58eaa029fc0f9c86278689d21a4b2f7956d42e5a9eb843a4b40a82c928e57dbe",
       "transactionIndex": 0,
       "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
     },
     "CustomNFTFacet": {
-      "address": "0x59b670e9fa9d0a427751af201d676719a970857b",
-      "blockNumber": "22",
-      "blockHash": "0x815d1185ece6a9ca019a6ec194a26516a7b6e43cce1b8aa23b0aaef836216aa7",
-      "transactionHash": "0x7de193c1033f9e60ef9116f5ca8bcaf7620c30de596f94ffb54aad3696673fab",
+      "address": "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6",
+      "blockNumber": "9",
+      "blockHash": "0x893903d7a94fbf507a3224adaec85935a53c690f59c0e592a23fd6c135a20636",
+      "transactionHash": "0x9445a7fd5175bce32dde7a260dd6da565e5b55bee34ca1bd1c134dfb30f5e12f",
       "transactionIndex": 0,
       "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
     }

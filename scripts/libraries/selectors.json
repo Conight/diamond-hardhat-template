@@ -8,6 +8,12 @@
       "IERC6909"
     ]
   },
+  "0x010a014d": {
+    "signature": "burnERC20From(address,uint256)",
+    "contracts": [
+      "ERC20BurnFacet"
+    ]
+  },
   "0x01ffc9a7": {
     "signature": "supportsInterface(bytes4)",
     "contracts": [
@@ -19,7 +25,6 @@
     "signature": "name()",
     "contracts": [
       "ERC20MetadataFacet",
-      "ERC721EnumerableFacet",
       "ERC721MetadataFacet",
       "IERC20",
       "IERC721Enumerable",
@@ -30,7 +35,6 @@
     "signature": "getApproved(uint256)",
     "contracts": [
       "ERC721DataFacet",
-      "ERC721EnumerableFacet",
       "IERC721",
       "IERC721Enumerable"
     ]
@@ -47,7 +51,6 @@
     "contracts": [
       "ERC20ApproveFacet",
       "ERC721ApproveFacet",
-      "ERC721EnumerableFacet",
       "IERC20",
       "IERC721",
       "IERC721Enumerable"
@@ -71,7 +74,7 @@
     "contracts": [
       "CustomNFTFacet",
       "ERC20DataFacet",
-      "ERC721EnumerableFacet",
+      "ERC721EnumerableDataFacet",
       "IERC20",
       "IERC721Enumerable"
     ]
@@ -80,6 +83,12 @@
     "signature": "crosschainMint(address,uint256)",
     "contracts": [
       "ERC20BridgeableFacet"
+    ]
+  },
+  "0x1a168da2": {
+    "signature": "burnERC20(uint256)",
+    "contracts": [
+      "ERC20BurnFacet"
     ]
   },
   "0x1e4e0091": {
@@ -92,7 +101,7 @@
     "signature": "transferFrom(address,address,uint256)",
     "contracts": [
       "ERC20TransferFacet",
-      "ERC721EnumerableFacet",
+      "ERC721EnumerableTransferFacet",
       "ERC721TransferFacet",
       "IERC20",
       "IERC721",
@@ -134,7 +143,7 @@
   "0x2f745c59": {
     "signature": "tokenOfOwnerByIndex(address,uint256)",
     "contracts": [
-      "ERC721EnumerableFacet",
+      "ERC721EnumerableDataFacet",
       "IERC721Enumerable"
     ]
   },
@@ -158,6 +167,12 @@
       "AccessControlFacet"
     ]
   },
+  "0x3cb9f1d8": {
+    "signature": "burnERC721(uint256)",
+    "contracts": [
+      "ERC721BurnFacet"
+    ]
+  },
   "0x426a8493": {
     "signature": "approve(address,uint256,uint256)",
     "contracts": [
@@ -168,7 +183,7 @@
   "0x42842e0e": {
     "signature": "safeTransferFrom(address,address,uint256)",
     "contracts": [
-      "ERC721EnumerableFacet",
+      "ERC721EnumerableTransferFacet",
       "ERC721TransferFacet",
       "IERC721",
       "IERC721Enumerable"
@@ -177,8 +192,6 @@
   "0x42966c68": {
     "signature": "burn(uint256)",
     "contracts": [
-      "ERC20BurnFacet",
-      "ERC721BurnFacet",
       "ERC721EnumerableBurnFacet",
       "IERC20"
     ]
@@ -193,7 +206,7 @@
   "0x4f6ccce7": {
     "signature": "tokenByIndex(uint256)",
     "contracts": [
-      "ERC721EnumerableFacet"
+      "ERC721EnumerableDataFacet"
     ]
   },
   "0x52ef6b2c": {
@@ -226,7 +239,6 @@
     "signature": "ownerOf(uint256)",
     "contracts": [
       "ERC721DataFacet",
-      "ERC721EnumerableFacet",
       "IERC721",
       "IERC721Enumerable"
     ]
@@ -248,7 +260,6 @@
     "contracts": [
       "ERC20DataFacet",
       "ERC721DataFacet",
-      "ERC721EnumerableFacet",
       "IERC20",
       "IERC721",
       "IERC721Enumerable"
@@ -270,7 +281,6 @@
   "0x79cc6790": {
     "signature": "burnFrom(address,uint256)",
     "contracts": [
-      "ERC20BurnFacet",
       "IERC20"
     ]
   },
@@ -323,7 +333,6 @@
     "signature": "symbol()",
     "contracts": [
       "ERC20MetadataFacet",
-      "ERC721EnumerableFacet",
       "ERC721MetadataFacet",
       "IERC20",
       "IERC721Enumerable",
@@ -335,10 +344,15 @@
     "contracts": [
       "ERC1155Facet",
       "ERC721ApproveFacet",
-      "ERC721EnumerableFacet",
       "IERC1155",
       "IERC721",
       "IERC721Enumerable"
+    ]
+  },
+  "0xa2e144c2": {
+    "signature": "burnERC721s(uint256[])",
+    "contracts": [
+      "ERC721BurnFacet"
     ]
   },
   "0xa9059cbb": {
@@ -376,7 +390,7 @@
   "0xb88d4fde": {
     "signature": "safeTransferFrom(address,address,uint256,bytes)",
     "contracts": [
-      "ERC721EnumerableFacet",
+      "ERC721EnumerableTransferFacet",
       "ERC721TransferFacet",
       "IERC721",
       "IERC721Enumerable"
@@ -403,7 +417,6 @@
   "0xc87b56dd": {
     "signature": "tokenURI(uint256)",
     "contracts": [
-      "ERC721EnumerableFacet",
       "ERC721MetadataFacet",
       "IERC721Metadata"
     ]
@@ -469,7 +482,6 @@
     "contracts": [
       "ERC1155Facet",
       "ERC721DataFacet",
-      "ERC721EnumerableFacet",
       "IERC1155",
       "IERC721",
       "IERC721Enumerable"

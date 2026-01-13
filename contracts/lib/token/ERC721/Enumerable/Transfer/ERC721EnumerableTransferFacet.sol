@@ -29,7 +29,7 @@ interface IERC721Receiver {
  * @notice A complete, dependency-free ERC-721 implementation with enumeration support using a custom storage layout.
  * @dev Provides metadata, ownership, approvals, enumeration, safe transfers, minting, and burning features.
  */
-contract ERC721EnumerableFacet {
+contract ERC721EnumerableTransferFacet {
     /**
      * @notice Thrown when operating on a non-existent token.
      */
@@ -134,13 +134,12 @@ contract ERC721EnumerableFacet {
             }
             erc721Storage.balanceOf[_from]--;
 
-            uint256 toTokensCount = erc721Storage.balanceOf[_to];
-            s.ownerTokensIndex[_tokenId] = toTokensCount;
-            s.ownerTokens[_to][toTokensCount] = _tokenId;
-            erc721Storage.balanceOf[_to] = toTokensCount + 1;
+            tokenIndex = erc721Storage.balanceOf[_to];
+            s.ownerTokensIndex[_tokenId] = tokenIndex;
+            s.ownerTokens[_to][tokenIndex] = _tokenId;
+            erc721Storage.balanceOf[_to] = tokenIndex + 1;
             erc721Storage.ownerOf[_tokenId] = _to;
         }
-
         emit Transfer(_from, _to, _tokenId);
     }
 

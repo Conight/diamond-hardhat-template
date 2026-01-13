@@ -56,7 +56,7 @@ contract CustomNFTFacet {
         uint256 tokenId = s.totalSupply;
 
         // Mint the token
-        ERC721MintMod.mint(to, tokenId);
+        ERC721MintMod.mintERC721(to, tokenId);
 
         // Update supply (safe to use unchecked as overflow is practically impossible)
         unchecked {
