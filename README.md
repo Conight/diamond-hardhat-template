@@ -13,7 +13,6 @@ A sophisticated, production-ready template for building modular and upgradeable 
 > **Primary Credit Belongs To:**
 >
 > 1. **[Perfect-Abstractions/Compose](https://github.com/Perfect-Abstractions/Compose)** - The primary implementation reference and architectural foundation for this template.
->
 > 2. **[Nick Mudge (@mudgen)](https://github.com/mudgen)** - Creator of the Diamond Standard (EIP-2535/EIP-8109) and the original Diamond implementations.
 >
 > This template merely provides a **Hardhat integration layer** with deployment scripts and developer tooling around their exceptional work. All fundamental concepts, patterns, and the majority of the smart contract logic originate from the above sources.
@@ -44,6 +43,7 @@ A sophisticated, production-ready template for building modular and upgradeable 
   - `upgrade.ts`: Automated upgrade script.
 - `tasks/`: Custom Hardhat tasks.
   - `selectors.ts`: Logic for generating function selector mappings.
+  - `common.ts`: Common deploy & upgrade functions for diamond facets tasks.
 - `deployment/`: Network-specific deployment history.
 
 ## 🏁 Getting Started
@@ -73,7 +73,7 @@ RPC_URL=your_rpc_url
 ### Compilation
 
 ```bash
-npx hardhat compile
+pnpm hardhat compile
 ```
 
 ### Generate Selectors
@@ -81,7 +81,7 @@ npx hardhat compile
 Before deploying or upgrading, run the selectors task to update the function mapping:
 
 ```bash
-npx hardhat selectors
+pnpm hardhat selectors
 ```
 
 ### Initial Deployment
@@ -89,7 +89,10 @@ npx hardhat selectors
 Deploys the Diamond contract along with the standard facets (`DiamondUpgradeFacet`, `DiamondInspectFacet`, `OwnerFacet`) and your custom facets.
 
 ```bash
-npx hardhat run scripts/deploy.ts --network <your-network>
+# Scripts
+pnpm hardhat run scripts/deploy.ts --network <your-network>
+# Hardhat Tasks
+pnpm hardhat customNFT --deploy --network <your-network>
 ```
 
 ### Upgrading the Diamond
@@ -97,7 +100,7 @@ npx hardhat run scripts/deploy.ts --network <your-network>
 The upgrade script automatically detects changes in your facets and prepares a `upgradeDiamond` transaction.
 
 ```bash
-npx hardhat run scripts/upgrade.ts --network <your-network>
+pnpm hardhat run scripts/upgrade.ts --network <your-network>
 ```
 
 ## 💎 The Diamond Standard
@@ -106,7 +109,7 @@ This template uses the **Diamond Standard (EIP-2535)**. Diamonds are multi-facet
 
 - **Facets**: Independent contracts that implement specific functionality.
 - **Diamond**: The main contract that delegates calls to facets based on function selectors.
-- **Loupe**: A set of functions to inspect facets and their supported selectors (implemented in `DiamondInspectFacet`).
+- **Inspect**: A set of functions to inspect facets and their supported selectors (implemented in `DiamondInspectFacet`).
 
 ## 📜 License
 

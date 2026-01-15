@@ -9,6 +9,31 @@ const selectors = task("selectors", "Generate new selectors file")
   .setAction(() => import("./tasks/selectors.js"))
   .build();
 
+function diamondTask(
+  name: string,
+  description: string,
+  action: () => Promise<any>,
+) {
+  return task(name, description)
+    .addFlag({
+      name: "deploy",
+      description: `Deploy new ${name}`,
+    })
+    .addFlag({
+      name: "upgrade",
+      description: `Upgrade existing ${name}`,
+    })
+    .setAction(action)
+    .build();
+}
+
+// Diamond tasks
+const customNFT = diamondTask(
+  "customNFT",
+  "Deploy & upgrade customNFT",
+  () => import("@/tasks/customNFT.js"),
+);
+
 export default defineConfig({
   plugins: [hardhatToolboxViemPlugin],
   solidity: {
@@ -43,5 +68,5 @@ export default defineConfig({
       chainType: "op",
     },
   },
-  tasks: [selectors],
+  tasks: [selectors, customNFT],
 });
