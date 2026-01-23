@@ -2,6 +2,7 @@
   "0x00fdd58e": {
     "signature": "balanceOf(address,uint256)",
     "contracts": [
+      "ERC1155DataFacet",
       "ERC1155Facet",
       "ERC6909Facet",
       "IERC1155",
@@ -199,6 +200,7 @@
   "0x4e1273f4": {
     "signature": "balanceOfBatch(address[],uint256[])",
     "contracts": [
+      "ERC1155DataFacet",
       "ERC1155Facet",
       "IERC1155"
     ]
@@ -480,6 +482,7 @@
   "0xe985e9c5": {
     "signature": "isApprovedForAll(address,address)",
     "contracts": [
+      "ERC1155DataFacet",
       "ERC1155Facet",
       "ERC721DataFacet",
       "IERC1155",

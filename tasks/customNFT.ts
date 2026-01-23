@@ -1,15 +1,4 @@
 import { createDiamondTask } from "./common.js";
+import { CustomNFTFacets } from "./config.js";
 
-const facets = [
-  "DiamondUpgradeFacet",
-  "DiamondInspectFacet",
-  "OwnerFacet",
-  "ERC165Facet",
-  "ERC721TransferFacet",
-  "ERC721DataFacet",
-  "ERC721ApproveFacet",
-  "ERC721BurnFacet",
-  "CustomNFTFacet",
-];
-
-export default createDiamondTask("CustomNFTDiamond", facets);
+export default createDiamondTask("CustomNFTDiamond", CustomNFTFacets);

@@ -9,11 +9,14 @@ importers:
   .:
     devDependencies:
       '@nomicfoundation/hardhat-toolbox-viem':
-        specifier: ^5.0.1
-        version: 5.0.1(a93cf1134aecd254a3e031aa96727590)
+        specifier: ^5.0.2
+        version: 5.0.2(89dc22120be3bc65465345e3ba927763)
       '@types/node':
-        specifier: ^25.0.9
-        version: 25.0.9
+        specifier: ^25.0.10
+        version: 25.0.10
+      '@wagmi/cli':
+        specifier: ^2.9.0
+        version: 2.9.0(typescript@5.9.3)
       chalk:
         specifier: ^5.6.2
         version: 5.6.2
@@ -24,14 +27,14 @@ importers:
         specifier: github:foundry-rs/forge-std#v1.9.4
         version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/1eea5bae12ae557d589f9f0f0edae2faa47cb262
       hardhat:
-        specifier: ^3.1.4
-        version: 3.1.4
+        specifier: ^3.1.5
+        version: 3.1.5
       prettier:
-        specifier: ^3.8.0
-        version: 3.8.0
+        specifier: ^3.8.1
+        version: 3.8.1
       prettier-plugin-solidity:
         specifier: ^2.2.1
-        version: 2.2.1(prettier@3.8.0)
+        version: 2.2.1(prettier@3.8.1)
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
@@ -66,16 +69,34 @@ packages:
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
     engines: {node: '>=0.1.90'}
 
+  '@esbuild/aix-ppc64@0.25.12':
+    resolution: {integrity: sha512-Hhmwd6CInZ3dwpuGTF8fJG6yoWmsToE+vYgD4nytZVxcu1ulHpUQRAB1UJ8+N1Am3Mz4+xOByoQoSZf4D+CpkA==}
+    engines: {node: '>=18'}
+    cpu: [ppc64]
+    os: [aix]
+
   '@esbuild/aix-ppc64@0.27.2':
     resolution: {integrity: sha512-GZMB+a0mOMZs4MpDbj8RJp4cw+w1WV5NYD6xzgvzUJ5Ek2jerwfO2eADyI6ExDSUED+1X8aMbegahsJi+8mgpw==}
     engines: {node: '>=18'}
     cpu: [ppc64]
     os: [aix]
 
+  '@esbuild/android-arm64@0.25.12':
+    resolution: {integrity: sha512-6AAmLG7zwD1Z159jCKPvAxZd4y/VTO0VkprYy+3N2FtJ8+BQWFXU+OxARIwA46c5tdD9SsKGZ/1ocqBS/gAKHg==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [android]
+
   '@esbuild/android-arm64@0.27.2':
     resolution: {integrity: sha512-pvz8ZZ7ot/RBphf8fv60ljmaoydPU12VuXHImtAs0XhLLw+EXBi2BLe3OYSBslR4rryHvweW5gmkKFwTiFy6KA==}
     engines: {node: '>=18'}
     cpu: [arm64]
+    os: [android]
+
+  '@esbuild/android-arm@0.25.12':
+    resolution: {integrity: sha512-VJ+sKvNA/GE7Ccacc9Cha7bpS8nyzVv0jdVgwNDaR4gDMC/2TTRc33Ip8qrNYUcpkOHUT5OZ0bUcNNVZQ9RLlg==}
+    engines: {node: '>=18'}
+    cpu: [arm]
     os: [android]
 
   '@esbuild/android-arm@0.27.2':
@@ -84,16 +105,34 @@ packages:
     cpu: [arm]
     os: [android]
 
+  '@esbuild/android-x64@0.25.12':
+    resolution: {integrity: sha512-5jbb+2hhDHx5phYR2By8GTWEzn6I9UqR11Kwf22iKbNpYrsmRB18aX/9ivc5cabcUiAT/wM+YIZ6SG9QO6a8kg==}
+    engines: {node: '>=18'}
+    cpu: [x64]
+    os: [android]
+
   '@esbuild/android-x64@0.27.2':
     resolution: {integrity: sha512-z8Ank4Byh4TJJOh4wpz8g2vDy75zFL0TlZlkUkEwYXuPSgX8yzep596n6mT7905kA9uHZsf/o2OJZubl2l3M7A==}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [android]
 
+  '@esbuild/darwin-arm64@0.25.12':
+    resolution: {integrity: sha512-N3zl+lxHCifgIlcMUP5016ESkeQjLj/959RxxNYIthIg+CQHInujFuXeWbWMgnTo4cp5XVHqFPmpyu9J65C1Yg==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [darwin]
+
   '@esbuild/darwin-arm64@0.27.2':
     resolution: {integrity: sha512-davCD2Zc80nzDVRwXTcQP/28fiJbcOwvdolL0sOiOsbwBa72kegmVU0Wrh1MYrbuCL98Omp5dVhQFWRKR2ZAlg==}
     engines: {node: '>=18'}
     cpu: [arm64]
+    os: [darwin]
+
+  '@esbuild/darwin-x64@0.25.12':
+    resolution: {integrity: sha512-HQ9ka4Kx21qHXwtlTUVbKJOAnmG1ipXhdWTmNXiPzPfWKpXqASVcWdnf2bnL73wgjNrFXAa3yYvBSd9pzfEIpA==}
+    engines: {node: '>=18'}
+    cpu: [x64]
     os: [darwin]
 
   '@esbuild/darwin-x64@0.27.2':
@@ -102,10 +141,22 @@ packages:
     cpu: [x64]
     os: [darwin]
 
+  '@esbuild/freebsd-arm64@0.25.12':
+    resolution: {integrity: sha512-gA0Bx759+7Jve03K1S0vkOu5Lg/85dou3EseOGUes8flVOGxbhDDh/iZaoek11Y8mtyKPGF3vP8XhnkDEAmzeg==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [freebsd]
+
   '@esbuild/freebsd-arm64@0.27.2':
     resolution: {integrity: sha512-lS/9CN+rgqQ9czogxlMcBMGd+l8Q3Nj1MFQwBZJyoEKI50XGxwuzznYdwcav6lpOGv5BqaZXqvBSiB/kJ5op+g==}
     engines: {node: '>=18'}
     cpu: [arm64]
+    os: [freebsd]
+
+  '@esbuild/freebsd-x64@0.25.12':
+    resolution: {integrity: sha512-TGbO26Yw2xsHzxtbVFGEXBFH0FRAP7gtcPE7P5yP7wGy7cXK2oO7RyOhL5NLiqTlBh47XhmIUXuGciXEqYFfBQ==}
+    engines: {node: '>=18'}
+    cpu: [x64]
     os: [freebsd]
 
   '@esbuild/freebsd-x64@0.27.2':
@@ -114,10 +165,22 @@ packages:
     cpu: [x64]
     os: [freebsd]
 
+  '@esbuild/linux-arm64@0.25.12':
+    resolution: {integrity: sha512-8bwX7a8FghIgrupcxb4aUmYDLp8pX06rGh5HqDT7bB+8Rdells6mHvrFHHW2JAOPZUbnjUpKTLg6ECyzvas2AQ==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [linux]
+
   '@esbuild/linux-arm64@0.27.2':
     resolution: {integrity: sha512-hYxN8pr66NsCCiRFkHUAsxylNOcAQaxSSkHMMjcpx0si13t1LHFphxJZUiGwojB1a/Hd5OiPIqDdXONia6bhTw==}
     engines: {node: '>=18'}
     cpu: [arm64]
+    os: [linux]
+
+  '@esbuild/linux-arm@0.25.12':
+    resolution: {integrity: sha512-lPDGyC1JPDou8kGcywY0YILzWlhhnRjdof3UlcoqYmS9El818LLfJJc3PXXgZHrHCAKs/Z2SeZtDJr5MrkxtOw==}
+    engines: {node: '>=18'}
+    cpu: [arm]
     os: [linux]
 
   '@esbuild/linux-arm@0.27.2':
@@ -126,10 +189,22 @@ packages:
     cpu: [arm]
     os: [linux]
 
+  '@esbuild/linux-ia32@0.25.12':
+    resolution: {integrity: sha512-0y9KrdVnbMM2/vG8KfU0byhUN+EFCny9+8g202gYqSSVMonbsCfLjUO+rCci7pM0WBEtz+oK/PIwHkzxkyharA==}
+    engines: {node: '>=18'}
+    cpu: [ia32]
+    os: [linux]
+
   '@esbuild/linux-ia32@0.27.2':
     resolution: {integrity: sha512-MJt5BRRSScPDwG2hLelYhAAKh9imjHK5+NE/tvnRLbIqUWa+0E9N4WNMjmp/kXXPHZGqPLxggwVhz7QP8CTR8w==}
     engines: {node: '>=18'}
     cpu: [ia32]
+    os: [linux]
+
+  '@esbuild/linux-loong64@0.25.12':
+    resolution: {integrity: sha512-h///Lr5a9rib/v1GGqXVGzjL4TMvVTv+s1DPoxQdz7l/AYv6LDSxdIwzxkrPW438oUXiDtwM10o9PmwS/6Z0Ng==}
+    engines: {node: '>=18'}
+    cpu: [loong64]
     os: [linux]
 
   '@esbuild/linux-loong64@0.27.2':
@@ -138,10 +213,22 @@ packages:
     cpu: [loong64]
     os: [linux]
 
+  '@esbuild/linux-mips64el@0.25.12':
+    resolution: {integrity: sha512-iyRrM1Pzy9GFMDLsXn1iHUm18nhKnNMWscjmp4+hpafcZjrr2WbT//d20xaGljXDBYHqRcl8HnxbX6uaA/eGVw==}
+    engines: {node: '>=18'}
+    cpu: [mips64el]
+    os: [linux]
+
   '@esbuild/linux-mips64el@0.27.2':
     resolution: {integrity: sha512-nlP2I6ArEBewvJ2gjrrkESEZkB5mIoaTswuqNFRv/WYd+ATtUpe9Y09RnJvgvdag7he0OWgEZWhviS1OTOKixw==}
     engines: {node: '>=18'}
     cpu: [mips64el]
+    os: [linux]
+
+  '@esbuild/linux-ppc64@0.25.12':
+    resolution: {integrity: sha512-9meM/lRXxMi5PSUqEXRCtVjEZBGwB7P/D4yT8UG/mwIdze2aV4Vo6U5gD3+RsoHXKkHCfSxZKzmDssVlRj1QQA==}
+    engines: {node: '>=18'}
+    cpu: [ppc64]
     os: [linux]
 
   '@esbuild/linux-ppc64@0.27.2':
@@ -150,10 +237,22 @@ packages:
     cpu: [ppc64]
     os: [linux]
 
+  '@esbuild/linux-riscv64@0.25.12':
+    resolution: {integrity: sha512-Zr7KR4hgKUpWAwb1f3o5ygT04MzqVrGEGXGLnj15YQDJErYu/BGg+wmFlIDOdJp0PmB0lLvxFIOXZgFRrdjR0w==}
+    engines: {node: '>=18'}
+    cpu: [riscv64]
+    os: [linux]
+
   '@esbuild/linux-riscv64@0.27.2':
     resolution: {integrity: sha512-B5BOmojNtUyN8AXlK0QJyvjEZkWwy/FKvakkTDCziX95AowLZKR6aCDhG7LeF7uMCXEJqwa8Bejz5LTPYm8AvA==}
     engines: {node: '>=18'}
     cpu: [riscv64]
+    os: [linux]
+
+  '@esbuild/linux-s390x@0.25.12':
+    resolution: {integrity: sha512-MsKncOcgTNvdtiISc/jZs/Zf8d0cl/t3gYWX8J9ubBnVOwlk65UIEEvgBORTiljloIWnBzLs4qhzPkJcitIzIg==}
+    engines: {node: '>=18'}
+    cpu: [s390x]
     os: [linux]
 
   '@esbuild/linux-s390x@0.27.2':
@@ -162,16 +261,34 @@ packages:
     cpu: [s390x]
     os: [linux]
 
+  '@esbuild/linux-x64@0.25.12':
+    resolution: {integrity: sha512-uqZMTLr/zR/ed4jIGnwSLkaHmPjOjJvnm6TVVitAa08SLS9Z0VM8wIRx7gWbJB5/J54YuIMInDquWyYvQLZkgw==}
+    engines: {node: '>=18'}
+    cpu: [x64]
+    os: [linux]
+
   '@esbuild/linux-x64@0.27.2':
     resolution: {integrity: sha512-uwp2Tip5aPmH+NRUwTcfLb+W32WXjpFejTIOWZFw/v7/KnpCDKG66u4DLcurQpiYTiYwQ9B7KOeMJvLCu/OvbA==}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [linux]
 
+  '@esbuild/netbsd-arm64@0.25.12':
+    resolution: {integrity: sha512-xXwcTq4GhRM7J9A8Gv5boanHhRa/Q9KLVmcyXHCTaM4wKfIpWkdXiMog/KsnxzJ0A1+nD+zoecuzqPmCRyBGjg==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [netbsd]
+
   '@esbuild/netbsd-arm64@0.27.2':
     resolution: {integrity: sha512-Kj6DiBlwXrPsCRDeRvGAUb/LNrBASrfqAIok+xB0LxK8CHqxZ037viF13ugfsIpePH93mX7xfJp97cyDuTZ3cw==}
     engines: {node: '>=18'}
     cpu: [arm64]
+    os: [netbsd]
+
+  '@esbuild/netbsd-x64@0.25.12':
+    resolution: {integrity: sha512-Ld5pTlzPy3YwGec4OuHh1aCVCRvOXdH8DgRjfDy/oumVovmuSzWfnSJg+VtakB9Cm0gxNO9BzWkj6mtO1FMXkQ==}
+    engines: {node: '>=18'}
+    cpu: [x64]
     os: [netbsd]
 
   '@esbuild/netbsd-x64@0.27.2':
@@ -180,10 +297,22 @@ packages:
     cpu: [x64]
     os: [netbsd]
 
+  '@esbuild/openbsd-arm64@0.25.12':
+    resolution: {integrity: sha512-fF96T6KsBo/pkQI950FARU9apGNTSlZGsv1jZBAlcLL1MLjLNIWPBkj5NlSz8aAzYKg+eNqknrUJ24QBybeR5A==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [openbsd]
+
   '@esbuild/openbsd-arm64@0.27.2':
     resolution: {integrity: sha512-DNIHH2BPQ5551A7oSHD0CKbwIA/Ox7+78/AWkbS5QoRzaqlev2uFayfSxq68EkonB+IKjiuxBFoV8ESJy8bOHA==}
     engines: {node: '>=18'}
     cpu: [arm64]
+    os: [openbsd]
+
+  '@esbuild/openbsd-x64@0.25.12':
+    resolution: {integrity: sha512-MZyXUkZHjQxUvzK7rN8DJ3SRmrVrke8ZyRusHlP+kuwqTcfWLyqMOE3sScPPyeIXN/mDJIfGXvcMqCgYKekoQw==}
+    engines: {node: '>=18'}
+    cpu: [x64]
     os: [openbsd]
 
   '@esbuild/openbsd-x64@0.27.2':
@@ -192,11 +321,23 @@ packages:
     cpu: [x64]
     os: [openbsd]
 
+  '@esbuild/openharmony-arm64@0.25.12':
+    resolution: {integrity: sha512-rm0YWsqUSRrjncSXGA7Zv78Nbnw4XL6/dzr20cyrQf7ZmRcsovpcRBdhD43Nuk3y7XIoW2OxMVvwuRvk9XdASg==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [openharmony]
+
   '@esbuild/openharmony-arm64@0.27.2':
     resolution: {integrity: sha512-LRBbCmiU51IXfeXk59csuX/aSaToeG7w48nMwA6049Y4J4+VbWALAuXcs+qcD04rHDuSCSRKdmY63sruDS5qag==}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [openharmony]
+
+  '@esbuild/sunos-x64@0.25.12':
+    resolution: {integrity: sha512-3wGSCDyuTHQUzt0nV7bocDy72r2lI33QL3gkDNGkod22EsYl04sMf0qLb8luNKTOmgF/eDEDP5BFNwoBKH441w==}
+    engines: {node: '>=18'}
+    cpu: [x64]
+    os: [sunos]
 
   '@esbuild/sunos-x64@0.27.2':
     resolution: {integrity: sha512-kMtx1yqJHTmqaqHPAzKCAkDaKsffmXkPHThSfRwZGyuqyIeBvf08KSsYXl+abf5HDAPMJIPnbBfXvP2ZC2TfHg==}
@@ -204,16 +345,34 @@ packages:
     cpu: [x64]
     os: [sunos]
 
+  '@esbuild/win32-arm64@0.25.12':
+    resolution: {integrity: sha512-rMmLrur64A7+DKlnSuwqUdRKyd3UE7oPJZmnljqEptesKM8wx9J8gx5u0+9Pq0fQQW8vqeKebwNXdfOyP+8Bsg==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [win32]
+
   '@esbuild/win32-arm64@0.27.2':
     resolution: {integrity: sha512-Yaf78O/B3Kkh+nKABUF++bvJv5Ijoy9AN1ww904rOXZFLWVc5OLOfL56W+C8F9xn5JQZa3UX6m+IktJnIb1Jjg==}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [win32]
 
+  '@esbuild/win32-ia32@0.25.12':
+    resolution: {integrity: sha512-HkqnmmBoCbCwxUKKNPBixiWDGCpQGVsrQfJoVGYLPT41XWF8lHuE5N6WhVia2n4o5QK5M4tYr21827fNhi4byQ==}
+    engines: {node: '>=18'}
+    cpu: [ia32]
+    os: [win32]
+
   '@esbuild/win32-ia32@0.27.2':
     resolution: {integrity: sha512-Iuws0kxo4yusk7sw70Xa2E2imZU5HoixzxfGCdxwBdhiDgt9vX9VUCBhqcwY7/uh//78A1hMkkROMJq9l27oLQ==}
     engines: {node: '>=18'}
     cpu: [ia32]
+    os: [win32]
+
+  '@esbuild/win32-x64@0.25.12':
+    resolution: {integrity: sha512-alJC0uCZpTFrSL0CCDjcgleBXPnCrEAhTBILpeAp7M/OFgoqtAetfBzX0xM00MUsVVPpVjlPuMbREqnZCXaTnA==}
+    engines: {node: '>=18'}
+    cpu: [x64]
     os: [win32]
 
   '@esbuild/win32-x64@0.27.2':
@@ -398,23 +557,23 @@ packages:
     peerDependencies:
       hardhat: ^3.0.0
 
-  '@nomicfoundation/hardhat-toolbox-viem@5.0.1':
-    resolution: {integrity: sha512-NhPQjHwTk356k6WS7tPeEWS5ymtlZe2lzcZzvgd2AD7wrMXE/zUu5qacXgwPq/M6HVEczSpuFeu+/koQgA2pbA==}
+  '@nomicfoundation/hardhat-toolbox-viem@5.0.2':
+    resolution: {integrity: sha512-b0hMvronSuryRiQrmB6DxFbpUFB3dMpIVpqCE/zYxG31IakEiuBG1Z/ky5BERVJJSD0nkCAH4wF33GS4PS6UZw==}
     peerDependencies:
-      '@nomicfoundation/hardhat-ignition': ^3.0.0
-      '@nomicfoundation/hardhat-ignition-viem': ^3.0.0
+      '@nomicfoundation/hardhat-ignition': ^3.0.7
+      '@nomicfoundation/hardhat-ignition-viem': ^3.0.7
       '@nomicfoundation/hardhat-keystore': ^3.0.0
       '@nomicfoundation/hardhat-network-helpers': ^3.0.0
       '@nomicfoundation/hardhat-node-test-runner': ^3.0.0
       '@nomicfoundation/hardhat-verify': ^3.0.0
-      '@nomicfoundation/hardhat-viem': ^3.0.0
-      '@nomicfoundation/hardhat-viem-assertions': ^3.0.0
-      '@nomicfoundation/ignition-core': ^3.0.0
+      '@nomicfoundation/hardhat-viem': ^3.0.2
+      '@nomicfoundation/hardhat-viem-assertions': ^3.0.5
+      '@nomicfoundation/ignition-core': ^3.0.7
       hardhat: ^3.0.0
-      viem: ^2.30.0
+      viem: ^2.43.0
 
-  '@nomicfoundation/hardhat-utils@3.0.5':
-    resolution: {integrity: sha512-5zkQSuSxkwK7fQxKswJ1GGc/3AuWBSmxA7GhczTPLx28dAXQnubRU8nA48SkCkKesJq5x4TROP+XheSE2VkLUA==}
+  '@nomicfoundation/hardhat-utils@3.0.6':
+    resolution: {integrity: sha512-AD/LPNdjXNFRrZcaAAewgJpdnHpPppZxo5p+x6wGMm5Hz4B3+oLf/LUzVn8qb4DDy9RE2c24l2F8vmL/w6ZuXg==}
 
   '@nomicfoundation/hardhat-vendored@3.0.0':
     resolution: {integrity: sha512-bzIOdG4iAuYSs9JSnaVOtH7qUKJ6W5+OtOiL8MlyFuLKYN2hjIisGO4pY5zR4N7xi/3RjfcnjVNz8tU0DPg2Cw==}
@@ -445,8 +604,8 @@ packages:
   '@nomicfoundation/ignition-core@3.0.6':
     resolution: {integrity: sha512-o5CTrlQ1PEQW85ppS7fxXCsSVl3j/T/3roTSA795lRJf7SQdJzr5y12rSTvoqR2YbeF5zDxVdqgzEqoMd8n6Cw==}
 
-  '@nomicfoundation/ignition-ui@3.0.6':
-    resolution: {integrity: sha512-PePoQO4LwLfQyMGZOtbF5eOgYSu/kXCyif/0Jpto1dfFLAtvoUbvaLrecrclM/keCTriRADOauH/zH06ihzvCg==}
+  '@nomicfoundation/ignition-ui@3.0.7':
+    resolution: {integrity: sha512-K7bL7V1cEh7nccAiWD1L15QdtNiPoM37IJdvBhgxV4sa25//r9yIxHf/DHI52qxQXqQuXKWdiBZBcbldtStM1Q==}
 
   '@nomicfoundation/slang@1.3.1':
     resolution: {integrity: sha512-gh0+JDjazmevEYCcwVgtuyfBJcV1209gIORZNRjUxbGzbQN0MOhQO9T0ptkzHKCf854gUy27SMxPbAyAu63fvQ==}
@@ -520,8 +679,17 @@ packages:
   '@types/node@22.7.5':
     resolution: {integrity: sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ==}
 
-  '@types/node@25.0.9':
-    resolution: {integrity: sha512-/rpCXHlCWeqClNBwUhDcusJxXYDjZTyE8v5oTO7WbL8eij2nKhUeU89/6xgjU7N4/Vh3He0BtyhJdQbDyhiXAw==}
+  '@types/node@25.0.10':
+    resolution: {integrity: sha512-zWW5KPngR/yvakJgGOmZ5vTBemDoSqF3AcV/LrO5u5wTWyEAVVh+IT39G4gtyAkh3CtTZs8aX/yRM82OfzHJRg==}
+
+  '@wagmi/cli@2.9.0':
+    resolution: {integrity: sha512-6gBF+IMFsaHpXEdjN+OZAy4Rctv+CNyNHmW4Edl1PSeNBlfdCQj01eAy13FLdv+bfyal/hoE7Ox+SKN16FnU1w==}
+    hasBin: true
+    peerDependencies:
+      typescript: '>=5.7.3'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   abitype@1.2.3:
     resolution: {integrity: sha512-Ofer5QUnuUdTFsBRwARMoWKOH1ND5ehwYhJ3OJ/BQO+StkwQjHw0XyVh4vDttzHB7QOFhPHa/o413PJ82gU/Tg==}
@@ -566,6 +734,16 @@ packages:
   brorand@1.1.0:
     resolution: {integrity: sha512-cKV8tMCEpQs4hK/ik71d6LrPOnpkpGBR0wzxqr68g2m/LB2GxVYQroAjMJZRVM1Y4BCjCKc3vAamxSzOY2RP+w==}
 
+  bundle-require@5.1.0:
+    resolution: {integrity: sha512-3WrrOuZiyaaZPWiEt4G3+IffISVC9HYlWueJEBWED4ZH4aIAC2PnkdnuRrR94M+w6yGWn4AglWtJtBI8YqvgoA==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+    peerDependencies:
+      esbuild: '>=0.18'
+
+  cac@6.7.14:
+    resolution: {integrity: sha512-b6Ilus+c3RrdDk+JhLKUAQfzzgLEPy6wcXqS7f/xe1EETvsDP6GORG7SFuOs6cID5YkqchW/LXZbX5bc8j7ZcQ==}
+    engines: {node: '>=8'}
+
   cbor2@1.12.0:
     resolution: {integrity: sha512-3Cco8XQhi27DogSp9Ri6LYNZLi/TBY/JVnDe+mj06NkBjW/ZYOtekaEU4wZ4xcRMNrFkDv8KNtOAqHyDfz3lYg==}
     engines: {node: '>=18.7'}
@@ -577,6 +755,13 @@ packages:
   chalk@5.6.2:
     resolution: {integrity: sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==}
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
+
+  change-case@5.4.4:
+    resolution: {integrity: sha512-HRQyTk2/YPEkt9TnUPbOpr64Uw3KOicFWPVBb+xiHvd6eBx/qPr9xqfBFDT8P2vWsvvz4jbEkfDe71W3VyNu2w==}
+
+  chokidar@4.0.1:
+    resolution: {integrity: sha512-n8enUVCED/KVRQlab1hr3MVpcVMvxtZjmEa956u+4YijlmQED223XMSYj2tLuKvr4jcCTzNNMpQDUer72MMmzA==}
+    engines: {node: '>= 14.16.0'}
 
   chokidar@4.0.3:
     resolution: {integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==}
@@ -602,9 +787,20 @@ packages:
       supports-color:
         optional: true
 
+  dedent@0.7.0:
+    resolution: {integrity: sha512-Q6fKUPqnAHAyhiUgFU7BUzLiv0kd8saH9al7tnu5Q/okj6dnupxyTgFIBjVzJATdfIAm9NAsvXNzjaKa+bxVyA==}
+
   diff-sequences@29.6.3:
     resolution: {integrity: sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
+
+  dotenv-expand@10.0.0:
+    resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
+    engines: {node: '>=12'}
+
+  dotenv@16.6.1:
+    resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
+    engines: {node: '>=12'}
 
   elliptic@6.6.1:
     resolution: {integrity: sha512-RaddvvMatK2LJHqFJ+YA4WysVN5Ita9E35botqIYspQ4TkRAlCicdzKOjlyv/1Za5RyTNn7di//eEV0uTAfe3g==}
@@ -620,10 +816,19 @@ packages:
     resolution: {integrity: sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A==}
     engines: {node: '>=6'}
 
+  esbuild@0.25.12:
+    resolution: {integrity: sha512-bbPBYYrtZbkt6Os6FiTLCTFxvq4tt3JKall1vRwshA3fdVztsLAatFaZobhkBC8/BrPetoa0oksYoKXoG4ryJg==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   esbuild@0.27.2:
     resolution: {integrity: sha512-HyNQImnsOC7X9PMNaCIeAm4ISCQXs5a5YasTXVliKv4uuBo1dKrG0A+uQS8M5eXjVMnLg3WgXaKvprHlFJQffw==}
     engines: {node: '>=18'}
     hasBin: true
+
+  escalade@3.2.0:
+    resolution: {integrity: sha512-WUj2qlxaQtO4g6Pq5c29GTcWGDyd8itL8zTlipgECz3JesAiiOKotd8JU6otB3PACgG6xkJUyVhboMS+bje/jA==}
+    engines: {node: '>=6'}
 
   ethereum-cryptography@2.2.1:
     resolution: {integrity: sha512-r/W8lkHSiTLxUxW8Rf3u4HGB0xQweG2RyETjywylKZSzLWoWAijRz8WCuOtJ6wah+avllXBqZuk29HCCvhEIRg==}
@@ -639,6 +844,15 @@ packages:
     resolution: {integrity: sha512-jt2DW/aNFNwke7AUd+Z+e6pz39KO5rzdbbFCg2sGafS4mk13MI7Z8O5z9cADNn5lhGODIgLwug6TZO2ctf7kcw==}
     engines: {node: '>=6.0.0'}
 
+  fdir@6.5.0:
+    resolution: {integrity: sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==}
+    engines: {node: '>=12.0.0'}
+    peerDependencies:
+      picomatch: ^3 || ^4
+    peerDependenciesMeta:
+      picomatch:
+        optional: true
+
   forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/1eea5bae12ae557d589f9f0f0edae2faa47cb262:
     resolution: {tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/1eea5bae12ae557d589f9f0f0edae2faa47cb262}
     version: 1.9.4
@@ -651,8 +865,8 @@ packages:
   get-tsconfig@4.13.0:
     resolution: {integrity: sha512-1VKTZJCwBrvbd+Wn3AOgQP/2Av+TfTCOlE4AcRJE72W1ksZXbAx8PPBR9RzgTeSPzlPMHrbANMH3LbltH73wxQ==}
 
-  hardhat@3.1.4:
-    resolution: {integrity: sha512-HHKiZqdK5/INqDqGz8JqTlTCv/vpHLM9b0gCrz9hrSALgR5mo8YJkhPl8fGDcITNkkG23ksdCH+pNUEKPJX5dw==}
+  hardhat@3.1.5:
+    resolution: {integrity: sha512-0Z0KI/m6wJYCMZgDK3QuVqR59lSa3aMu6QHKqnbIYXKu/phQ+YFKJZAY4zkUKX21ZjcrrRg25qLUzZw1bO6g/A==}
     hasBin: true
 
   has-flag@4.0.0:
@@ -707,6 +921,10 @@ packages:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
     engines: {node: '>=6'}
 
+  load-tsconfig@0.2.5:
+    resolution: {integrity: sha512-IXO6OCs9yg8tMKzfPZ1YmheJbZCiEsnBdcB03l0OcfK9prKnJb96siuHCr5Fl37/yo9DnKU+TLpxzTUspw9shg==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
   lodash-es@4.17.21:
     resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
 
@@ -728,6 +946,9 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
+  nanospinner@1.2.2:
+    resolution: {integrity: sha512-Zt/AmG6qRU3e+WnzGGLuMCEAO/dAu45stNbHY223tUxldaDAeE+FxSPsd9Q+j+paejmm0ZbrNVs5Sraqy3dRxA==}
+
   ndjson@2.0.0:
     resolution: {integrity: sha512-nGl7LRGrzugTtaFcJMhLbpzJM6XdivmbkdlaGcrk/LXg2KL/YBC6z1g70xh0/al+oFuVFP8N8kiWRucmeEH/qQ==}
     engines: {node: '>=10'}
@@ -745,14 +966,24 @@ packages:
     resolution: {integrity: sha512-tkAQEw8ysMzmkhgw8k+1U/iPhWNhykKnSk4Rd5zLoPJCuJaGRPo6YposrZgaxHKzDHdDWWZvE/Sk7hsL2X/CpQ==}
     engines: {node: '>=18'}
 
+  pathe@1.1.2:
+    resolution: {integrity: sha512-whLdWMYL2TwI08hn8/ZqAbrVemu0LNaNNJZX73O6qaIdCTfXutsLhMkjdENX0qhsQ9uIimo4/aQOmXkoon2nDQ==}
+
+  picocolors@1.1.1:
+    resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
+
+  picomatch@3.0.1:
+    resolution: {integrity: sha512-I3EurrIQMlRc9IaAZnqRR044Phh2DXY+55o7uJ0V+hYZAcQYSuFWsc9q5PvyDHUSCe1Qxn/iBz+78s86zWnGag==}
+    engines: {node: '>=10'}
+
   prettier-plugin-solidity@2.2.1:
     resolution: {integrity: sha512-LOHfxECJ/gHsY7qi4D7vanz8cVsCf6yFotBapJ5O0qaX0ZR1sGUzbWfMd4JeQYOItFl+wXW9IcjZOdfr6bmSvQ==}
     engines: {node: '>=20'}
     peerDependencies:
       prettier: '>=3.0.0'
 
-  prettier@3.8.0:
-    resolution: {integrity: sha512-yEPsovQfpxYfgWNhCfECjG5AQaO+K3dp6XERmOepyPDVqcJm+bjyCVO3pmU+nAPe0N5dDvekfGezt/EIiRe1TA==}
+  prettier@3.8.1:
+    resolution: {integrity: sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -898,6 +1129,9 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+
 snapshots:
 
   '@actions/core@1.11.1':
@@ -925,79 +1159,157 @@ snapshots:
   '@colors/colors@1.5.0':
     optional: true
 
+  '@esbuild/aix-ppc64@0.25.12':
+    optional: true
+
   '@esbuild/aix-ppc64@0.27.2':
+    optional: true
+
+  '@esbuild/android-arm64@0.25.12':
     optional: true
 
   '@esbuild/android-arm64@0.27.2':
     optional: true
 
+  '@esbuild/android-arm@0.25.12':
+    optional: true
+
   '@esbuild/android-arm@0.27.2':
+    optional: true
+
+  '@esbuild/android-x64@0.25.12':
     optional: true
 
   '@esbuild/android-x64@0.27.2':
     optional: true
 
+  '@esbuild/darwin-arm64@0.25.12':
+    optional: true
+
   '@esbuild/darwin-arm64@0.27.2':
+    optional: true
+
+  '@esbuild/darwin-x64@0.25.12':
     optional: true
 
   '@esbuild/darwin-x64@0.27.2':
     optional: true
 
+  '@esbuild/freebsd-arm64@0.25.12':
+    optional: true
+
   '@esbuild/freebsd-arm64@0.27.2':
+    optional: true
+
+  '@esbuild/freebsd-x64@0.25.12':
     optional: true
 
   '@esbuild/freebsd-x64@0.27.2':
     optional: true
 
+  '@esbuild/linux-arm64@0.25.12':
+    optional: true
+
   '@esbuild/linux-arm64@0.27.2':
+    optional: true
+
+  '@esbuild/linux-arm@0.25.12':
     optional: true
 
   '@esbuild/linux-arm@0.27.2':
     optional: true
 
+  '@esbuild/linux-ia32@0.25.12':
+    optional: true
+
   '@esbuild/linux-ia32@0.27.2':
+    optional: true
+
+  '@esbuild/linux-loong64@0.25.12':
     optional: true
 
   '@esbuild/linux-loong64@0.27.2':
     optional: true
 
+  '@esbuild/linux-mips64el@0.25.12':
+    optional: true
+
   '@esbuild/linux-mips64el@0.27.2':
+    optional: true
+
+  '@esbuild/linux-ppc64@0.25.12':
     optional: true
 
   '@esbuild/linux-ppc64@0.27.2':
     optional: true
 
+  '@esbuild/linux-riscv64@0.25.12':
+    optional: true
+
   '@esbuild/linux-riscv64@0.27.2':
+    optional: true
+
+  '@esbuild/linux-s390x@0.25.12':
     optional: true
 
   '@esbuild/linux-s390x@0.27.2':
     optional: true
 
+  '@esbuild/linux-x64@0.25.12':
+    optional: true
+
   '@esbuild/linux-x64@0.27.2':
+    optional: true
+
+  '@esbuild/netbsd-arm64@0.25.12':
     optional: true
 
   '@esbuild/netbsd-arm64@0.27.2':
     optional: true
 
+  '@esbuild/netbsd-x64@0.25.12':
+    optional: true
+
   '@esbuild/netbsd-x64@0.27.2':
+    optional: true
+
+  '@esbuild/openbsd-arm64@0.25.12':
     optional: true
 
   '@esbuild/openbsd-arm64@0.27.2':
     optional: true
 
+  '@esbuild/openbsd-x64@0.25.12':
+    optional: true
+
   '@esbuild/openbsd-x64@0.27.2':
+    optional: true
+
+  '@esbuild/openharmony-arm64@0.25.12':
     optional: true
 
   '@esbuild/openharmony-arm64@0.27.2':
     optional: true
 
+  '@esbuild/sunos-x64@0.25.12':
+    optional: true
+
   '@esbuild/sunos-x64@0.27.2':
+    optional: true
+
+  '@esbuild/win32-arm64@0.25.12':
     optional: true
 
   '@esbuild/win32-arm64@0.27.2':
     optional: true
 
+  '@esbuild/win32-ia32@0.25.12':
+    optional: true
+
   '@esbuild/win32-ia32@0.27.2':
+    optional: true
+
+  '@esbuild/win32-x64@0.25.12':
     optional: true
 
   '@esbuild/win32-x64@0.27.2':
@@ -1196,32 +1508,32 @@ snapshots:
 
   '@nomicfoundation/hardhat-errors@3.0.6':
     dependencies:
-      '@nomicfoundation/hardhat-utils': 3.0.5
+      '@nomicfoundation/hardhat-utils': 3.0.6
     transitivePeerDependencies:
       - supports-color
 
-  '@nomicfoundation/hardhat-ignition-viem@3.0.6(@nomicfoundation/hardhat-ignition@3.0.6(@nomicfoundation/hardhat-verify@3.0.8(hardhat@3.1.4))(hardhat@3.1.4))(@nomicfoundation/hardhat-verify@3.0.8(hardhat@3.1.4))(@nomicfoundation/hardhat-viem@3.0.1(hardhat@3.1.4)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76)))(@nomicfoundation/ignition-core@3.0.6)(hardhat@3.1.4)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76))':
+  '@nomicfoundation/hardhat-ignition-viem@3.0.6(@nomicfoundation/hardhat-ignition@3.0.6(@nomicfoundation/hardhat-verify@3.0.8(hardhat@3.1.5))(hardhat@3.1.5))(@nomicfoundation/hardhat-verify@3.0.8(hardhat@3.1.5))(@nomicfoundation/hardhat-viem@3.0.1(hardhat@3.1.5)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76)))(@nomicfoundation/ignition-core@3.0.6)(hardhat@3.1.5)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76))':
     dependencies:
       '@nomicfoundation/hardhat-errors': 3.0.6
-      '@nomicfoundation/hardhat-ignition': 3.0.6(@nomicfoundation/hardhat-verify@3.0.8(hardhat@3.1.4))(hardhat@3.1.4)
-      '@nomicfoundation/hardhat-verify': 3.0.8(hardhat@3.1.4)
-      '@nomicfoundation/hardhat-viem': 3.0.1(hardhat@3.1.4)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76))
+      '@nomicfoundation/hardhat-ignition': 3.0.6(@nomicfoundation/hardhat-verify@3.0.8(hardhat@3.1.5))(hardhat@3.1.5)
+      '@nomicfoundation/hardhat-verify': 3.0.8(hardhat@3.1.5)
+      '@nomicfoundation/hardhat-viem': 3.0.1(hardhat@3.1.5)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76))
       '@nomicfoundation/ignition-core': 3.0.6
-      hardhat: 3.1.4
+      hardhat: 3.1.5
       viem: 2.44.4(typescript@5.9.3)(zod@3.25.76)
     transitivePeerDependencies:
       - supports-color
 
-  '@nomicfoundation/hardhat-ignition@3.0.6(@nomicfoundation/hardhat-verify@3.0.8(hardhat@3.1.4))(hardhat@3.1.4)':
+  '@nomicfoundation/hardhat-ignition@3.0.6(@nomicfoundation/hardhat-verify@3.0.8(hardhat@3.1.5))(hardhat@3.1.5)':
     dependencies:
       '@nomicfoundation/hardhat-errors': 3.0.6
-      '@nomicfoundation/hardhat-utils': 3.0.5
-      '@nomicfoundation/hardhat-verify': 3.0.8(hardhat@3.1.4)
+      '@nomicfoundation/hardhat-utils': 3.0.6
+      '@nomicfoundation/hardhat-verify': 3.0.8(hardhat@3.1.5)
       '@nomicfoundation/ignition-core': 3.0.6
-      '@nomicfoundation/ignition-ui': 3.0.6
+      '@nomicfoundation/ignition-ui': 3.0.7
       chalk: 5.6.2
       debug: 4.4.3
-      hardhat: 3.1.4
+      hardhat: 3.1.5
       json5: 2.2.3
       prompts: 2.4.2
     transitivePeerDependencies:
@@ -1229,25 +1541,25 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@nomicfoundation/hardhat-keystore@3.0.3(hardhat@3.1.4)':
+  '@nomicfoundation/hardhat-keystore@3.0.3(hardhat@3.1.5)':
     dependencies:
       '@noble/ciphers': 1.2.1
       '@noble/hashes': 1.7.1
       '@nomicfoundation/hardhat-errors': 3.0.6
-      '@nomicfoundation/hardhat-utils': 3.0.5
+      '@nomicfoundation/hardhat-utils': 3.0.6
       '@nomicfoundation/hardhat-zod-utils': 3.0.1(zod@3.25.76)
       chalk: 5.6.2
       debug: 4.4.3
-      hardhat: 3.1.4
+      hardhat: 3.1.5
       zod: 3.25.76
     transitivePeerDependencies:
       - supports-color
 
-  '@nomicfoundation/hardhat-network-helpers@3.0.3(hardhat@3.1.4)':
+  '@nomicfoundation/hardhat-network-helpers@3.0.3(hardhat@3.1.5)':
     dependencies:
       '@nomicfoundation/hardhat-errors': 3.0.6
-      '@nomicfoundation/hardhat-utils': 3.0.5
-      hardhat: 3.1.4
+      '@nomicfoundation/hardhat-utils': 3.0.6
+      hardhat: 3.1.5
     transitivePeerDependencies:
       - supports-color
 
@@ -1257,33 +1569,33 @@ snapshots:
       chalk: 5.6.2
       jest-diff: 29.7.0
 
-  '@nomicfoundation/hardhat-node-test-runner@3.0.8(hardhat@3.1.4)':
+  '@nomicfoundation/hardhat-node-test-runner@3.0.8(hardhat@3.1.5)':
     dependencies:
       '@nomicfoundation/hardhat-errors': 3.0.6
       '@nomicfoundation/hardhat-node-test-reporter': 3.0.2
-      '@nomicfoundation/hardhat-utils': 3.0.5
+      '@nomicfoundation/hardhat-utils': 3.0.6
       '@nomicfoundation/hardhat-zod-utils': 3.0.1(zod@3.25.76)
-      hardhat: 3.1.4
+      hardhat: 3.1.5
       tsx: 4.21.0
       zod: 3.25.76
     transitivePeerDependencies:
       - supports-color
 
-  '@nomicfoundation/hardhat-toolbox-viem@5.0.1(a93cf1134aecd254a3e031aa96727590)':
+  '@nomicfoundation/hardhat-toolbox-viem@5.0.2(89dc22120be3bc65465345e3ba927763)':
     dependencies:
-      '@nomicfoundation/hardhat-ignition': 3.0.6(@nomicfoundation/hardhat-verify@3.0.8(hardhat@3.1.4))(hardhat@3.1.4)
-      '@nomicfoundation/hardhat-ignition-viem': 3.0.6(@nomicfoundation/hardhat-ignition@3.0.6(@nomicfoundation/hardhat-verify@3.0.8(hardhat@3.1.4))(hardhat@3.1.4))(@nomicfoundation/hardhat-verify@3.0.8(hardhat@3.1.4))(@nomicfoundation/hardhat-viem@3.0.1(hardhat@3.1.4)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76)))(@nomicfoundation/ignition-core@3.0.6)(hardhat@3.1.4)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76))
-      '@nomicfoundation/hardhat-keystore': 3.0.3(hardhat@3.1.4)
-      '@nomicfoundation/hardhat-network-helpers': 3.0.3(hardhat@3.1.4)
-      '@nomicfoundation/hardhat-node-test-runner': 3.0.8(hardhat@3.1.4)
-      '@nomicfoundation/hardhat-verify': 3.0.8(hardhat@3.1.4)
-      '@nomicfoundation/hardhat-viem': 3.0.1(hardhat@3.1.4)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76))
-      '@nomicfoundation/hardhat-viem-assertions': 3.0.4(@nomicfoundation/hardhat-viem@3.0.1(hardhat@3.1.4)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76)))(hardhat@3.1.4)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76))
+      '@nomicfoundation/hardhat-ignition': 3.0.6(@nomicfoundation/hardhat-verify@3.0.8(hardhat@3.1.5))(hardhat@3.1.5)
+      '@nomicfoundation/hardhat-ignition-viem': 3.0.6(@nomicfoundation/hardhat-ignition@3.0.6(@nomicfoundation/hardhat-verify@3.0.8(hardhat@3.1.5))(hardhat@3.1.5))(@nomicfoundation/hardhat-verify@3.0.8(hardhat@3.1.5))(@nomicfoundation/hardhat-viem@3.0.1(hardhat@3.1.5)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76)))(@nomicfoundation/ignition-core@3.0.6)(hardhat@3.1.5)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76))
+      '@nomicfoundation/hardhat-keystore': 3.0.3(hardhat@3.1.5)
+      '@nomicfoundation/hardhat-network-helpers': 3.0.3(hardhat@3.1.5)
+      '@nomicfoundation/hardhat-node-test-runner': 3.0.8(hardhat@3.1.5)
+      '@nomicfoundation/hardhat-verify': 3.0.8(hardhat@3.1.5)
+      '@nomicfoundation/hardhat-viem': 3.0.1(hardhat@3.1.5)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76))
+      '@nomicfoundation/hardhat-viem-assertions': 3.0.4(@nomicfoundation/hardhat-viem@3.0.1(hardhat@3.1.5)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76)))(hardhat@3.1.5)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76))
       '@nomicfoundation/ignition-core': 3.0.6
-      hardhat: 3.1.4
+      hardhat: 3.1.5
       viem: 2.44.4(typescript@5.9.3)(zod@3.25.76)
 
-  '@nomicfoundation/hardhat-utils@3.0.5':
+  '@nomicfoundation/hardhat-utils@3.0.6':
     dependencies:
       '@streamparser/json-node': 0.0.22
       debug: 4.4.3
@@ -1298,36 +1610,36 @@ snapshots:
 
   '@nomicfoundation/hardhat-vendored@3.0.0': {}
 
-  '@nomicfoundation/hardhat-verify@3.0.8(hardhat@3.1.4)':
+  '@nomicfoundation/hardhat-verify@3.0.8(hardhat@3.1.5)':
     dependencies:
       '@ethersproject/abi': 5.8.0
       '@nomicfoundation/hardhat-errors': 3.0.6
-      '@nomicfoundation/hardhat-utils': 3.0.5
+      '@nomicfoundation/hardhat-utils': 3.0.6
       '@nomicfoundation/hardhat-zod-utils': 3.0.1(zod@3.25.76)
       cbor2: 1.12.0
       chalk: 5.6.2
       debug: 4.4.3
-      hardhat: 3.1.4
+      hardhat: 3.1.5
       semver: 7.7.3
       zod: 3.25.76
     transitivePeerDependencies:
       - supports-color
 
-  '@nomicfoundation/hardhat-viem-assertions@3.0.4(@nomicfoundation/hardhat-viem@3.0.1(hardhat@3.1.4)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76)))(hardhat@3.1.4)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76))':
+  '@nomicfoundation/hardhat-viem-assertions@3.0.4(@nomicfoundation/hardhat-viem@3.0.1(hardhat@3.1.5)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76)))(hardhat@3.1.5)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76))':
     dependencies:
       '@nomicfoundation/hardhat-errors': 3.0.6
-      '@nomicfoundation/hardhat-utils': 3.0.5
-      '@nomicfoundation/hardhat-viem': 3.0.1(hardhat@3.1.4)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76))
-      hardhat: 3.1.4
+      '@nomicfoundation/hardhat-utils': 3.0.6
+      '@nomicfoundation/hardhat-viem': 3.0.1(hardhat@3.1.5)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76))
+      hardhat: 3.1.5
       viem: 2.44.4(typescript@5.9.3)(zod@3.25.76)
     transitivePeerDependencies:
       - supports-color
 
-  '@nomicfoundation/hardhat-viem@3.0.1(hardhat@3.1.4)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76))':
+  '@nomicfoundation/hardhat-viem@3.0.1(hardhat@3.1.5)(viem@2.44.4(typescript@5.9.3)(zod@3.25.76))':
     dependencies:
       '@nomicfoundation/hardhat-errors': 3.0.6
-      '@nomicfoundation/hardhat-utils': 3.0.5
-      hardhat: 3.1.4
+      '@nomicfoundation/hardhat-utils': 3.0.6
+      hardhat: 3.1.5
       viem: 2.44.4(typescript@5.9.3)(zod@3.25.76)
     transitivePeerDependencies:
       - supports-color
@@ -1335,7 +1647,7 @@ snapshots:
   '@nomicfoundation/hardhat-zod-utils@3.0.1(zod@3.25.76)':
     dependencies:
       '@nomicfoundation/hardhat-errors': 3.0.6
-      '@nomicfoundation/hardhat-utils': 3.0.5
+      '@nomicfoundation/hardhat-utils': 3.0.6
       zod: 3.25.76
     transitivePeerDependencies:
       - supports-color
@@ -1344,7 +1656,7 @@ snapshots:
     dependencies:
       '@ethersproject/address': 5.6.1
       '@nomicfoundation/hardhat-errors': 3.0.6
-      '@nomicfoundation/hardhat-utils': 3.0.5
+      '@nomicfoundation/hardhat-utils': 3.0.6
       '@nomicfoundation/solidity-analyzer': 0.1.2
       cbor2: 1.12.0
       debug: 4.4.3
@@ -1357,7 +1669,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@nomicfoundation/ignition-ui@3.0.6': {}
+  '@nomicfoundation/ignition-ui@3.0.7': {}
 
   '@nomicfoundation/slang@1.3.1':
     dependencies:
@@ -1436,14 +1748,45 @@ snapshots:
     dependencies:
       undici-types: 6.19.8
 
-  '@types/node@25.0.9':
+  '@types/node@25.0.10':
     dependencies:
       undici-types: 7.16.0
+
+  '@wagmi/cli@2.9.0(typescript@5.9.3)':
+    dependencies:
+      abitype: 1.2.3(typescript@5.9.3)(zod@4.3.6)
+      bundle-require: 5.1.0(esbuild@0.25.12)
+      cac: 6.7.14
+      change-case: 5.4.4
+      chokidar: 4.0.1
+      dedent: 0.7.0
+      dotenv: 16.6.1
+      dotenv-expand: 10.0.0
+      esbuild: 0.25.12
+      escalade: 3.2.0
+      fdir: 6.5.0(picomatch@3.0.1)
+      nanospinner: 1.2.2
+      pathe: 1.1.2
+      picocolors: 1.1.1
+      picomatch: 3.0.1
+      prettier: 3.8.1
+      viem: 2.44.4(typescript@5.9.3)(zod@4.3.6)
+      zod: 4.3.6
+    optionalDependencies:
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   abitype@1.2.3(typescript@5.9.3)(zod@3.25.76):
     optionalDependencies:
       typescript: 5.9.3
       zod: 3.25.76
+
+  abitype@1.2.3(typescript@5.9.3)(zod@4.3.6):
+    optionalDependencies:
+      typescript: 5.9.3
+      zod: 4.3.6
 
   adm-zip@0.4.16: {}
 
@@ -1465,6 +1808,13 @@ snapshots:
 
   brorand@1.1.0: {}
 
+  bundle-require@5.1.0(esbuild@0.25.12):
+    dependencies:
+      esbuild: 0.25.12
+      load-tsconfig: 0.2.5
+
+  cac@6.7.14: {}
+
   cbor2@1.12.0: {}
 
   chalk@4.1.2:
@@ -1473,6 +1823,12 @@ snapshots:
       supports-color: 7.2.0
 
   chalk@5.6.2: {}
+
+  change-case@5.4.4: {}
+
+  chokidar@4.0.1:
+    dependencies:
+      readdirp: 4.1.2
 
   chokidar@4.0.3:
     dependencies:
@@ -1494,7 +1850,13 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
+  dedent@0.7.0: {}
+
   diff-sequences@29.6.3: {}
+
+  dotenv-expand@10.0.0: {}
+
+  dotenv@16.6.1: {}
 
   elliptic@6.6.1:
     dependencies:
@@ -1514,6 +1876,35 @@ snapshots:
       strip-ansi: 6.0.1
 
   env-paths@2.2.1: {}
+
+  esbuild@0.25.12:
+    optionalDependencies:
+      '@esbuild/aix-ppc64': 0.25.12
+      '@esbuild/android-arm': 0.25.12
+      '@esbuild/android-arm64': 0.25.12
+      '@esbuild/android-x64': 0.25.12
+      '@esbuild/darwin-arm64': 0.25.12
+      '@esbuild/darwin-x64': 0.25.12
+      '@esbuild/freebsd-arm64': 0.25.12
+      '@esbuild/freebsd-x64': 0.25.12
+      '@esbuild/linux-arm': 0.25.12
+      '@esbuild/linux-arm64': 0.25.12
+      '@esbuild/linux-ia32': 0.25.12
+      '@esbuild/linux-loong64': 0.25.12
+      '@esbuild/linux-mips64el': 0.25.12
+      '@esbuild/linux-ppc64': 0.25.12
+      '@esbuild/linux-riscv64': 0.25.12
+      '@esbuild/linux-s390x': 0.25.12
+      '@esbuild/linux-x64': 0.25.12
+      '@esbuild/netbsd-arm64': 0.25.12
+      '@esbuild/netbsd-x64': 0.25.12
+      '@esbuild/openbsd-arm64': 0.25.12
+      '@esbuild/openbsd-x64': 0.25.12
+      '@esbuild/openharmony-arm64': 0.25.12
+      '@esbuild/sunos-x64': 0.25.12
+      '@esbuild/win32-arm64': 0.25.12
+      '@esbuild/win32-ia32': 0.25.12
+      '@esbuild/win32-x64': 0.25.12
 
   esbuild@0.27.2:
     optionalDependencies:
@@ -1544,6 +1935,8 @@ snapshots:
       '@esbuild/win32-ia32': 0.27.2
       '@esbuild/win32-x64': 0.27.2
 
+  escalade@3.2.0: {}
+
   ethereum-cryptography@2.2.1:
     dependencies:
       '@noble/curves': 1.4.2
@@ -1568,6 +1961,10 @@ snapshots:
 
   fast-equals@5.4.0: {}
 
+  fdir@6.5.0(picomatch@3.0.1):
+    optionalDependencies:
+      picomatch: 3.0.1
+
   forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/1eea5bae12ae557d589f9f0f0edae2faa47cb262: {}
 
   fsevents@2.3.3:
@@ -1577,11 +1974,11 @@ snapshots:
     dependencies:
       resolve-pkg-maps: 1.0.0
 
-  hardhat@3.1.4:
+  hardhat@3.1.5:
     dependencies:
       '@nomicfoundation/edr': 0.12.0-next.22
       '@nomicfoundation/hardhat-errors': 3.0.6
-      '@nomicfoundation/hardhat-utils': 3.0.5
+      '@nomicfoundation/hardhat-utils': 3.0.6
       '@nomicfoundation/hardhat-vendored': 3.0.0
       '@nomicfoundation/hardhat-zod-utils': 3.0.1(zod@3.25.76)
       '@nomicfoundation/solidity-analyzer': 0.1.2
@@ -1646,6 +2043,8 @@ snapshots:
 
   kleur@3.0.3: {}
 
+  load-tsconfig@0.2.5: {}
+
   lodash-es@4.17.21: {}
 
   micro-eth-signer@0.14.0:
@@ -1665,6 +2064,10 @@ snapshots:
   minimist@1.2.8: {}
 
   ms@2.1.3: {}
+
+  nanospinner@1.2.2:
+    dependencies:
+      picocolors: 1.1.1
 
   ndjson@2.0.0:
     dependencies:
@@ -1689,16 +2092,37 @@ snapshots:
     transitivePeerDependencies:
       - zod
 
+  ox@0.11.3(typescript@5.9.3)(zod@4.3.6):
+    dependencies:
+      '@adraffy/ens-normalize': 1.11.1
+      '@noble/ciphers': 1.3.0
+      '@noble/curves': 1.9.1
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.2.3(typescript@5.9.3)(zod@4.3.6)
+      eventemitter3: 5.0.1
+    optionalDependencies:
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - zod
+
   p-map@7.0.4: {}
 
-  prettier-plugin-solidity@2.2.1(prettier@3.8.0):
+  pathe@1.1.2: {}
+
+  picocolors@1.1.1: {}
+
+  picomatch@3.0.1: {}
+
+  prettier-plugin-solidity@2.2.1(prettier@3.8.1):
     dependencies:
       '@nomicfoundation/slang': 1.3.1
       '@solidity-parser/parser': 0.20.2
-      prettier: 3.8.0
+      prettier: 3.8.1
       semver: 7.7.3
 
-  prettier@3.8.0: {}
+  prettier@3.8.1: {}
 
   pretty-format@29.7.0:
     dependencies:
@@ -1801,6 +2225,23 @@ snapshots:
       - utf-8-validate
       - zod
 
+  viem@2.44.4(typescript@5.9.3)(zod@4.3.6):
+    dependencies:
+      '@noble/curves': 1.9.1
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.2.3(typescript@5.9.3)(zod@4.3.6)
+      isows: 1.0.7(ws@8.18.3)
+      ox: 0.11.3(typescript@5.9.3)(zod@4.3.6)
+      ws: 8.18.3
+    optionalDependencies:
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - zod
+
   ws@8.17.1: {}
 
   ws@8.18.3: {}
@@ -1808,3 +2249,5 @@ snapshots:
   ws@8.19.0: {}
 
   zod@3.25.76: {}
+
+  zod@4.3.6: {}
