@@ -207,7 +207,7 @@ export class DiamondChanges {
         continue;
       }
       console.log(
-        `  - Deploying ${contractName} with ${diff.add.length} selector(s)`,
+        `  - Deploying ${contractName} with ${diff.add.length + diff.replace.length} selector(s)`,
       );
 
       const artifact = await artifacts.readArtifact(contractName);
