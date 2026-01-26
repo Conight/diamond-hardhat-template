@@ -1,7 +1,7 @@
 import { defineConfig } from "@wagmi/cli";
 import { readFileSync, readdirSync, statSync } from "fs";
 import { join } from "path";
-import { CustomNFTFacets } from "./tasks/config.js";
+import { CustomNFT } from "./tasks/config.js";
 
 // Helper: Recursively search for a file in a directory
 function findFile(dir: string, filename: string): string | null {
@@ -65,7 +65,7 @@ export default defineConfig({
   contracts: [
     {
       name: "CustomNFTDiamond",
-      abi: getDiamondAbi("CustomNFTDiamond", CustomNFTFacets),
+      abi: getDiamondAbi("CustomNFTDiamond", CustomNFT.facets),
     },
   ],
   plugins: [],
