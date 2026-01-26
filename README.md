@@ -29,6 +29,7 @@ A sophisticated, production-ready template for building modular and upgradeable 
   - Perform a "diff" between local facets and the deployed Diamond.
   - Provide a visual summary (table) of planned changes (Added/Replaced/Removed/Ignored).
   - Require manual confirmation before executing on-chain transactions.
+- **Automated Migration**: Supports a structured migration pattern where a specific facet can execute initialization logic (e.g., setting state) during deployment or upgrade. The system automatically detects if migration is needed and includes it in the transaction.
 - **Deployment Tracking**: Automatically saves detailed deployment records (addresses, hashes, facet functions) in the `deployment/` directory.
 - **Viem Integration**: Powered by Viem for fast, lightweight, and type-safe interactions with the Ethereum blockchain.
 
@@ -36,12 +37,14 @@ A sophisticated, production-ready template for building modular and upgradeable 
 
 - `contracts/`: Solidity source files.
   - `lib/`: Core logic and facet base classes.
-  - `AFacets.sol`, `CFacets.sol`: Example custom facets demonstrating modularity.
+  - `customNFT/`: Custom NFT implementation facets and diamond.
 - `scripts/`: Logic for deployment and maintenance.
   - `libraries/diamond.ts`: The "brain" of the Diamond management system.
   - `deploy.ts`: Initial deployment script.
   - `upgrade.ts`: Automated upgrade script.
 - `tasks/`: Custom Hardhat tasks.
+  - `customNFT.ts`: Task for deploying and upgrading the CustomNFT Diamond.
+  - `config.ts`: Configuration for custom facets.
   - `selectors.ts`: Logic for generating function selector mappings.
   - `common.ts`: Common deploy & upgrade functions for diamond facets tasks.
 - `deployment/`: Network-specific deployment history.
@@ -100,7 +103,10 @@ pnpm hardhat customNFT --deploy --network <your-network>
 The upgrade script automatically detects changes in your facets and prepares a `upgradeDiamond` transaction.
 
 ```bash
+# Scripts
 pnpm hardhat run scripts/upgrade.ts --network <your-network>
+# Hardhat Tasks
+pnpm hardhat customNFT --upgrade --network <your-network>
 ```
 
 ## 💎 The Diamond Standard
