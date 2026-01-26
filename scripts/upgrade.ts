@@ -16,7 +16,10 @@ const main = async () => {
     "ERC721BurnFacet",
     "CustomNFTFacet",
   ];
-  await upgradeDiamond(viem, networkName, diamondName, facets);
+  await upgradeDiamond(viem, networkName, diamondName, facets, {
+    facetName: "CustomNFTMigrationFacet",
+    args: { mintTo: "0x000000000000000000000000000000000000dEaD" },
+  });
 };
 
 main().catch((error) => {
