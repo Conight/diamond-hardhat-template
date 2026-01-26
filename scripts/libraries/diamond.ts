@@ -4,6 +4,7 @@ import {
   type AbiFunction,
   type Address,
   type GetTransactionReceiptReturnType,
+  encodeFunctionData,
   toFunctionSelector,
   zeroAddress,
   zeroHash,
@@ -72,6 +73,15 @@ interface DiamondDeployment {
   upgradeHistory: unknown[];
 }
 
+interface MintParams {
+  [key: string]: unknown;
+}
+
+export interface MigrationConfig {
+  facetName: string;
+  args: MintParams;
+}
+
 // ============================================================================
 // DiamondChanges Class
 // ============================================================================
@@ -84,6 +94,7 @@ export class DiamondChanges {
   #removeFunctions: Set<HashString>;
   #upgradeMode: boolean = false;
 
+  #migration?: MigrationConfig;
   #deployment?: DiamondDeployment;
 
   #deployedContracts = new Map<string, GetTransactionReceiptReturnType>();
@@ -96,6 +107,7 @@ export class DiamondChanges {
     selectorDiffs: Map<string, SelectorDiff>,
     removeFunctions: Set<HashString>,
     upgradeMode: boolean = false,
+    migration?: MigrationConfig,
     deployment?: DiamondDeployment,
   ) {
     this.#viem = viem;
@@ -104,6 +116,7 @@ export class DiamondChanges {
     this.#selectorDiffs = selectorDiffs;
     this.#removeFunctions = removeFunctions;
     this.#upgradeMode = upgradeMode;
+    this.#migration = migration;
     this.#deployment = deployment;
   }
 
@@ -233,6 +246,47 @@ export class DiamondChanges {
     }
     console.log("Facets deployed");
 
+    // check if needs migration
+    let migrationFacetAddress: Address = zeroAddress;
+    let migrationData: HashString = "0x";
+    if (this.#migration && this.#migration.facetName) {
+      if (this.#deployedContracts.has(this.#migration.facetName)) {
+        migrationFacetAddress = this.#deployedContracts.get(
+          this.#migration.facetName,
+        )!.contractAddress!;
+        const migration = await this.#viem.getContractAt(
+          this.#migration.facetName,
+          migrationFacetAddress,
+        );
+
+        const isMigrationCompleted =
+          await migration.read.isMigrationCompleted();
+
+        if (isMigrationCompleted) {
+          console.log(
+            chalk.gray(
+              `⚠️  Migration already completed for facet ${this.#migration.facetName}.`,
+            ),
+          );
+        } else {
+          const artifact = await artifacts.readArtifact(
+            this.#migration.facetName,
+          );
+
+          console.log(
+            `Preparing migration data for facet ${this.#migration.args}, ${this.#migration.facetName}...`,
+          );
+          migrationData = encodeFunctionData({
+            abi: artifact.abi,
+            functionName: "migrate",
+            args: [this.#migration.args],
+            // args: [{ mintTo: "0x000000000000000000000000000000000000dEaD" }],
+          });
+          console.log(`Migration data prepared: ${migrationData}`);
+        }
+      }
+    }
+
     if (!this.#upgradeMode) {
       // Deploy Diamond contract
       const artifact = await artifacts.readArtifact(this.#diamondName);
@@ -254,11 +308,36 @@ export class DiamondChanges {
       console.log(`${this.#diamondName} deployed: ${receipt.contractAddress}`);
       await this.saveDeployment(receipt);
       diamondAddress = receipt.contractAddress;
+
+      if (migrationFacetAddress !== zeroAddress) {
+        console.log(`Executing migration...`);
+        const diamondUpgrade = await this.#viem.getContractAt(
+          "DiamondUpgradeFacet",
+          diamondAddress,
+        );
+
+        const tx = await diamondUpgrade.write.upgradeDiamond([
+          [],
+          [],
+          [],
+          migrationFacetAddress,
+          migrationData,
+          zeroHash,
+          "0x",
+        ]);
+
+        const receipt = await publicClient.waitForTransactionReceipt({
+          hash: tx,
+        });
+        console.log(
+          `${this.#diamondName} upgrade with hash: ${receipt.transactionHash}`,
+        );
+      }
     } else {
+      // Upgrade existing Diamond
       diamondAddress = this.#deployment!.diamond;
 
       if (this.#deployedContracts.size > 0) {
-        // Execute upgrade
         const diamondUpgrade = await this.#viem.getContractAt(
           "DiamondUpgradeFacet",
           diamondAddress,
@@ -268,8 +347,8 @@ export class DiamondChanges {
           this.getAddFunctions(),
           this.getReplaceFunctions(),
           this.getRemoveFunctions(),
-          zeroAddress,
-          "0x",
+          migrationFacetAddress,
+          migrationData,
           zeroHash,
           "0x",
         ]);
@@ -286,6 +365,7 @@ export class DiamondChanges {
         console.log(`Diamond upgraded: ${diamondAddress}`);
       }
     }
+
     this.#deployed = true;
     return diamondAddress;
   }
@@ -412,6 +492,18 @@ export class DiamondChanges {
     }
 
     console.log(table.toString());
+
+    if (this.#migration && this.#migration.facetName) {
+      const diff = this.#selectorDiffs.get(this.#migration.facetName);
+      if (diff && (diff.add.length > 0 || diff.replace.length > 0)) {
+        console.log(
+          chalk.yellow(
+            `\n🚀 Migration scheduled for: ${this.#migration.facetName}`,
+          ),
+        );
+      }
+    }
+
     return this.#promptUser(
       "Review the table of Diamond changes. Proceed with upgrade? yN ",
     );
@@ -510,6 +602,7 @@ export class DiamondChanges {
     networkName: string,
     diamondName: string,
     facets: readonly string[],
+    migration: MigrationConfig,
     upgradeMode: boolean = false,
   ): Promise<DiamondChanges> {
     const selectorDiffs = new Map<string, SelectorDiff>();
@@ -532,6 +625,9 @@ export class DiamondChanges {
     }
 
     // Process each facet
+    if (migration.facetName && !facets.includes(migration.facetName)) {
+      facets = [...facets, migration.facetName];
+    }
     for (const facet of facets) {
       const diff: SelectorDiff = {
         add: [],
@@ -583,6 +679,7 @@ export class DiamondChanges {
       selectorDiffs,
       removeFunctions,
       upgradeMode,
+      migration,
       deployment,
     );
   }
@@ -622,6 +719,7 @@ export async function deployDiamond(
   networkName: string,
   diamondName: string,
   facets: readonly string[],
+  migration: MigrationConfig,
 ): Promise<Address | undefined> {
   await hre.tasks.getTask("selectors").run();
 
@@ -632,6 +730,8 @@ export async function deployDiamond(
     networkName,
     diamondName,
     facets,
+    migration,
+    false,
   );
   const shouldDeploy = await changes.verify();
 
@@ -651,6 +751,7 @@ export async function upgradeDiamond(
   networkName: string,
   diamondName: string,
   facets: readonly string[],
+  migration: MigrationConfig,
 ): Promise<Address | undefined> {
   await hre.tasks.getTask("selectors").run();
 
@@ -662,6 +763,7 @@ export async function upgradeDiamond(
     networkName,
     diamondName,
     facets,
+    migration,
     true,
   );
   const shouldUpgrade = await changes.verify();

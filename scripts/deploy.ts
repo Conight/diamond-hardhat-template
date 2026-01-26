@@ -17,7 +17,10 @@ const main = async () => {
     "CustomNFTFacet",
   ];
 
-  await deployDiamond(viem, networkName, diamondName, facets);
+  await deployDiamond(viem, networkName, diamondName, facets, {
+    facetName: "CustomNFTMigrationFacet",
+    args: { mintTo: "0x000000000000000000000000000000000000dEaD" },
+  });
 };
 
 main().catch((error) => {

@@ -24,10 +24,7 @@ contract CustomNFTDiamond {
      * @param _facets Array of facet addresses and their corresponding function selectors to add to the diamond.
      * @param _diamondOwner Address that will be set as the owner of the diamond contract.
      */
-    constructor(
-        DiamondMod.FacetFunctions[] memory _facets,
-        address _diamondOwner
-    ) {
+    constructor(DiamondMod.FacetFunctions[] memory _facets, address _diamondOwner) {
         DiamondMod.addFacets(_facets);
 
         /*************************************
@@ -41,11 +38,7 @@ contract CustomNFTDiamond {
         /**
          * Setting ERC721 token details
          */
-        ERC721MetadataMod.setMetadata({
-            _name: "CustomNFT",
-            _symbol: "cNFT",
-            _baseURI: "https://example.com/metadata/"
-        });
+        ERC721MetadataMod.setMetadata({_name: "CustomNFT", _symbol: "cNFT", _baseURI: "https://example.com/metadata/"});
         /**
          * Registering ERC165 interfaces
          */

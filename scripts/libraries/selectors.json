@@ -155,6 +155,12 @@
       "IERC20"
     ]
   },
+  "0x33c90bd0": {
+    "signature": "migrate((address))",
+    "contracts": [
+      "CustomNFTMigrationFacet"
+    ]
+  },
   "0x3644e515": {
     "signature": "DOMAIN_SEPARATOR()",
     "contracts": [
@@ -195,6 +201,12 @@
     "contracts": [
       "ERC721EnumerableBurnFacet",
       "IERC20"
+    ]
+  },
+  "0x4ca3613a": {
+    "signature": "isMigrationCompleted()",
+    "contracts": [
+      "CustomNFTMigrationFacet"
     ]
   },
   "0x4e1273f4": {

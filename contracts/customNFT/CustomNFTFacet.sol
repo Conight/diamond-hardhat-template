@@ -12,8 +12,7 @@ contract CustomNFTFacet {
     // ============ Storage ============
 
     /// @dev Storage position for CustomNFT data
-    bytes32 private constant STORAGE_POSITION =
-        keccak256("conight.customNFT.storage");
+    bytes32 private constant STORAGE_POSITION = keccak256("conight.customNFT.storage");
 
     struct CustomNFTStorage {
         uint256 totalSupply;
