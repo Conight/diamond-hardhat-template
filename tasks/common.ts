@@ -1,26 +1,24 @@
-import {
-  deployDiamond,
-  upgradeDiamond,
-  type MigrationConfig,
-} from "@/scripts/libraries/diamond.js";
+import { deployDiamond, upgradeDiamond } from "@/scripts/libraries/diamond.js";
 import { HardhatRuntimeEnvironment } from "hardhat/types/hre";
 import { TaskArguments } from "hardhat/types/tasks";
+import { DiamondConfiguration } from "@/config/types.js";
 
-const DefaultMigrationConfig: MigrationConfig = {
+const DefaultMigrationConfig = {
   facetName: "",
   args: {},
 };
 
 export const createDiamondTask = (
-  diamondName: string,
-  facets: string[],
-  migration?: MigrationConfig,
+  getConfig: (networkName: string) => DiamondConfiguration,
 ) => {
   return async function (
     taskArguments: TaskArguments,
     hre: HardhatRuntimeEnvironment,
   ): Promise<void> {
     const { viem, networkName } = await hre.network.connect();
+
+    const config = getConfig(networkName);
+    const { name: diamondName, facets, migration } = config;
 
     if (taskArguments.deploy) {
       console.log(`Deploying ${diamondName}...`);

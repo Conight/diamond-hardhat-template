@@ -5,11 +5,13 @@
   "scripts": {
     "generate": "wagmi generate",
     "prettier": "prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol'",
-    "lint": "prettier --list-different --plugin=prettier-plugin-solidity 'contracts/**/*.sol'"
+    "lint": "prettier --list-different --plugin=prettier-plugin-solidity 'contracts/**/*.sol'",
+    "test": "hardhat test",
+    "compile": "hardhat compile"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox-viem": "^5.0.2",
-    "@types/node": "^25.0.10",
+    "@types/node": "^25.1.0",
     "@wagmi/cli": "^2.9.0",
     "chalk": "^5.6.2",
     "cli-table3": "^0.6.5",

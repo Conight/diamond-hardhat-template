@@ -74,12 +74,12 @@ interface DiamondDeployment {
 }
 
 interface MigrationParams {
-  [key: string]: unknown;
+  readonly [key: string]: unknown;
 }
 
 export interface MigrationConfig {
-  facetName: string;
-  args: MigrationParams;
+  readonly facetName: string;
+  readonly args: MigrationParams;
 }
 
 // ============================================================================

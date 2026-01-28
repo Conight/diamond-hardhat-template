@@ -1,8 +1,4 @@
 import { createDiamondTask } from "./common.js";
-import { CustomNFT } from "./config.js";
+import { getCustomNFTConfig } from "@/config/customNFT.js";
 
-export default createDiamondTask(
-  "CustomNFTDiamond",
-  CustomNFT.facets,
-  CustomNFT.migration,
-);
+export default createDiamondTask(getCustomNFTConfig);

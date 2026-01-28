@@ -1,26 +1,16 @@
 import { network } from "hardhat";
 import { deployDiamond } from "./libraries/diamond.js";
+import { getCustomNFTConfig } from "@/config/customNFT.js";
 
 const main = async () => {
   const { viem, networkName } = await network.connect();
 
-  const diamondName = "CustomNFTDiamond";
-  const facets = [
-    "DiamondUpgradeFacet",
-    "DiamondInspectFacet",
-    "OwnerFacet",
-    "ERC165Facet",
-    "ERC721TransferFacet",
-    "ERC721DataFacet",
-    "ERC721ApproveFacet",
-    "ERC721BurnFacet",
-    "CustomNFTFacet",
-  ];
+  const config = getCustomNFTConfig(networkName);
 
-  await deployDiamond(viem, networkName, diamondName, facets, {
-    facetName: "CustomNFTMigrationFacet",
-    args: { mintTo: "0x000000000000000000000000000000000000dEaD" },
-  });
+  // Ensure migration is defined, or use a default compatible with deployDiamond
+  const migration = config.migration || { facetName: "", args: {} };
+
+  await deployDiamond(viem, networkName, config.name, config.facets, migration);
 };
 
 main().catch((error) => {
