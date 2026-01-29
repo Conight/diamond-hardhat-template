@@ -73,12 +73,3 @@ export function createDiamondTask(
     console.log(`\n✅ ${config.name} ready at ${result.diamondAddress}\n`);
   };
 }
-
-// ============================================================================
-// Deprecated Exports (for backwards compatibility)
-// ============================================================================
-
-/**
- * @deprecated Use `deployDiamond` from `@/scripts/libraries/index.js` directly
- */
-export { deployDiamond, upgradeDiamond } from "@/scripts/libraries/index.js";
