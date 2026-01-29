@@ -1,10 +1,10 @@
-export interface MigrationConfig {
-  facetName: string;
-  args: Record<string, unknown>;
-}
+/**
+ * Diamond Configuration Types
+ *
+ * Re-exports from the library for convenient access.
+ */
 
-export interface DiamondConfiguration {
-  name: string;
-  facets: readonly string[];
-  migration?: MigrationConfig;
-}
+export type {
+  DiamondConfig as DiamondConfiguration,
+  MigrationConfig,
+} from "@/scripts/libraries/types.js";

@@ -46,7 +46,7 @@ class SelectorTaskError extends Error {
   constructor(
     message: string,
     public readonly code: string,
-    public readonly cause?: unknown
+    public readonly cause?: unknown,
   ) {
     super(message);
     this.name = "SelectorTaskError";
@@ -71,7 +71,7 @@ async function fileExists(filePath: string): Promise<boolean> {
  * Loads existing selectors from disk with proper error handling
  */
 async function loadExistingSelectors(
-  outputPath: string
+  outputPath: string,
 ): Promise<Map<string, InternalSelectorInfo>> {
   const selectorMap = new Map<string, InternalSelectorInfo>();
 
@@ -123,7 +123,7 @@ async function processArtifact(
   name: string,
   hre: HardhatRuntimeEnvironment,
   selectorMap: Map<string, InternalSelectorInfo>,
-  stats: ProcessingStats
+  stats: ProcessingStats,
 ): Promise<void> {
   try {
     const artifact = await hre.artifacts.readArtifact(name);
@@ -182,14 +182,14 @@ async function processArtifactsInBatches(
   fullyQualifiedNames: readonly string[],
   hre: HardhatRuntimeEnvironment,
   selectorMap: Map<string, InternalSelectorInfo>,
-  stats: ProcessingStats
+  stats: ProcessingStats,
 ): Promise<void> {
   const batches: string[][] = [];
 
   // Split into batches
   for (let i = 0; i < fullyQualifiedNames.length; i += PARALLEL_BATCH_SIZE) {
     batches.push(
-      fullyQualifiedNames.slice(i, i + PARALLEL_BATCH_SIZE) as string[]
+      fullyQualifiedNames.slice(i, i + PARALLEL_BATCH_SIZE) as string[],
     );
   }
 
@@ -200,11 +200,11 @@ async function processArtifactsInBatches(
     if (!batch) continue;
 
     console.log(
-      `   Batch ${i + 1}/${batches.length} (${batch.length} artifacts)...`
+      `   Batch ${i + 1}/${batches.length} (${batch.length} artifacts)...`,
     );
 
     await Promise.all(
-      batch.map((name) => processArtifact(name, hre, selectorMap, stats))
+      batch.map((name) => processArtifact(name, hre, selectorMap, stats)),
     );
   }
 }
@@ -213,10 +213,10 @@ async function processArtifactsInBatches(
  * Converts the internal selector map to a sorted, serializable format
  */
 function serializeSelectorMap(
-  selectorMap: Map<string, InternalSelectorInfo>
+  selectorMap: Map<string, InternalSelectorInfo>,
 ): SelectorMapData {
   const sortedEntries = Array.from(selectorMap.entries()).sort(([a], [b]) =>
-    a.localeCompare(b)
+    a.localeCompare(b),
   );
 
   return Object.fromEntries(
@@ -227,7 +227,7 @@ function serializeSelectorMap(
         // Sort contracts for deterministic output
         contracts: Array.from(info.contracts).sort(),
       } satisfies SelectorInfo,
-    ])
+    ]),
   );
 }
 
@@ -254,7 +254,7 @@ function printStats(stats: ProcessingStats, totalSelectors: number): void {
  */
 export default async function selectorsTask(
   taskArguments: TaskArguments,
-  hre: HardhatRuntimeEnvironment
+  hre: HardhatRuntimeEnvironment,
 ): Promise<void> {
   console.log("🚀 Starting selectors task...\n");
 
@@ -282,7 +282,7 @@ export default async function selectorsTask(
       }
     } else {
       console.log(
-        "🆕 No existing selectors file found or overwrite flag is set. Creating new one.\n"
+        "🆕 No existing selectors file found or overwrite flag is set. Creating new one.\n",
       );
     }
 
@@ -314,7 +314,7 @@ export default async function selectorsTask(
     const sortedSelectors = serializeSelectorMap(selectorMap);
     await fs.writeFile(
       outputPath,
-      JSON.stringify(sortedSelectors, null, JSON_INDENT)
+      JSON.stringify(sortedSelectors, null, JSON_INDENT),
     );
 
     console.log(`\n💾 Selectors saved to: ${outputPath}`);
@@ -329,7 +329,7 @@ export default async function selectorsTask(
     throw new SelectorTaskError(
       "Failed to execute selectors task",
       "TASK_EXECUTION_ERROR",
-      error
+      error,
     );
   }
 }

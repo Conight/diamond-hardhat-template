@@ -1,47 +1,84 @@
-import { deployDiamond, upgradeDiamond } from "@/scripts/libraries/diamond.js";
-import { HardhatRuntimeEnvironment } from "hardhat/types/hre";
-import { TaskArguments } from "hardhat/types/tasks";
-import { DiamondConfiguration } from "@/config/types.js";
+/**
+ * Common Diamond Task Utilities
+ *
+ * Factory for creating Hardhat tasks for Diamond deployment and upgrades.
+ */
 
-const DefaultMigrationConfig = {
-  facetName: "",
-  args: {},
-};
+import {
+  deployDiamond,
+  upgradeDiamond,
+  deployOrUpgrade,
+} from "@/scripts/libraries/index.js";
+import type { HardhatRuntimeEnvironment } from "hardhat/types/hre";
+import type { TaskArguments } from "hardhat/types/tasks";
+import type { DiamondConfig } from "@/scripts/libraries/index.js";
 
-export const createDiamondTask = (
-  getConfig: (networkName: string) => DiamondConfiguration,
-) => {
-  return async function (
+// ============================================================================
+// Task Factory
+// ============================================================================
+
+/**
+ * Creates a Hardhat task for Diamond deployment and upgrades.
+ *
+ * @param getConfig - Function that returns the Diamond configuration for a network
+ * @returns Hardhat task action function
+ *
+ * @example
+ * ```ts
+ * // In tasks/customNFT.ts
+ * import { createDiamondTask } from "./common.js";
+ * import { getCustomNFTConfig } from "@/config/customNFT.js";
+ *
+ * export default createDiamondTask(getCustomNFTConfig);
+ * ```
+ */
+export function createDiamondTask(
+  getConfig: (networkName: string) => DiamondConfig,
+) {
+  return async function diamondTask(
     taskArguments: TaskArguments,
     hre: HardhatRuntimeEnvironment,
   ): Promise<void> {
     const { viem, networkName } = await hre.network.connect();
-
     const config = getConfig(networkName);
-    const { name: diamondName, facets, migration } = config;
 
-    if (taskArguments.deploy) {
-      console.log(`Deploying ${diamondName}...`);
-      await deployDiamond(
-        viem,
-        networkName,
-        diamondName,
-        facets,
-        migration ? migration : DefaultMigrationConfig,
-      );
-    } else if (taskArguments.upgrade) {
-      console.log(`Upgrading ${diamondName}...`);
-      await upgradeDiamond(
-        viem,
-        networkName,
-        diamondName,
-        facets,
-        migration ? migration : DefaultMigrationConfig,
-      );
-    } else {
-      throw new Error(
-        "At least one of --deploy or --upgrade must be specified",
-      );
+    // Determine operation mode
+    const isDeployOnly = Boolean(taskArguments.deploy);
+    const isUpgradeOnly = Boolean(taskArguments.upgrade);
+
+    if (isDeployOnly && isUpgradeOnly) {
+      throw new Error("Cannot specify both --deploy and --upgrade");
     }
+
+    // Execute appropriate operation
+    let result;
+
+    if (isDeployOnly) {
+      console.log(`\n🚀 Deploying ${config.name}...\n`);
+      result = await deployDiamond(viem, networkName, config);
+    } else if (isUpgradeOnly) {
+      console.log(`\n🔄 Upgrading ${config.name}...\n`);
+      result = await upgradeDiamond(viem, networkName, config);
+    } else {
+      // Smart mode: deploy if not exists, upgrade if exists
+      console.log(`\n💎 Deploy/Upgrade ${config.name}...\n`);
+      result = await deployOrUpgrade(viem, networkName, config);
+    }
+
+    if (!result) {
+      console.log("\n⚠️  Operation cancelled or no changes applied.\n");
+      return;
+    }
+
+    console.log(`\n✅ ${config.name} ready at ${result.diamondAddress}\n`);
   };
-};
+}
+
+// ============================================================================
+// Deprecated Exports (for backwards compatibility)
+// ============================================================================
+
+/**
+ * @deprecated Use `deployDiamond` from `@/scripts/libraries/index.js` directly
+ */
+export { deployDiamond, upgradeDiamond } from "@/scripts/libraries/index.js";

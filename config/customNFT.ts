@@ -1,5 +1,5 @@
 import type { Address } from "viem";
-import type { DiamondConfiguration } from "../config/types.js";
+import type { DiamondConfiguration } from "@/config/types.js";
 
 // ============================================================================
 // Constants & Types

@@ -1,775 +1,330 @@
-import hre, { artifacts } from "hardhat";
-import {
-  type Abi,
-  type AbiFunction,
-  type Address,
-  type GetTransactionReceiptReturnType,
-  encodeFunctionData,
-  toFunctionSelector,
-  zeroAddress,
-  zeroHash,
-} from "viem";
-import Table from "cli-table3";
-import chalk from "chalk";
-import { createInterface } from "node:readline";
-import existsSelectors from "./selectors.json";
-import path from "node:path";
-import * as fs from "node:fs/promises";
+/**
+ * Diamond Deployment Orchestrator
+ *
+ * Main entry point for Diamond deployment and upgrade operations.
+ * This module coordinates the various components:
+ * - Diffing: Computes what changed
+ * - Executor: Deploys contracts and executes upgrades
+ * - Deployment: Manages deployment files
+ * - Prompts: Handles user interaction
+ */
+
+import hre from "hardhat";
+import type { Address } from "viem";
 import type { NetworkConnection } from "hardhat/types/network";
 
+// Import all modules
+import { computeDiamondDiff } from "./diffing.js";
+import {
+  createDeployment,
+  createUpgradeRecord,
+  loadDeployment,
+  saveDeployment,
+  updateDeploymentForUpgrade,
+  deploymentExists,
+} from "./deployment.js";
+import {
+  buildDeploymentFunctions,
+  deployDiamondContract,
+  deployFacets,
+  executeDiamondUpgrade,
+  mergeDeploymentFunctions,
+  prepareMigration,
+  toDeploymentFacets,
+  toFacetFunctions,
+} from "./executor.js";
+import {
+  confirmChanges,
+  logOperationComplete,
+  logOperationStart,
+} from "./prompts.js";
+import type {
+  DiamondConfig,
+  DiamondDeployment,
+  FunctionFacetPair,
+  Selector,
+} from "./types.js";
+
+// Re-export types for consumers
+export type { DiamondConfig, MigrationConfig } from "./types.js";
+export { loadDeployment } from "./deployment.js";
+
 // ============================================================================
-// Types
+// Type Definitions
 // ============================================================================
 
-type HashString = `0x${string}`;
-type FunctionType = "add" | "replace" | "ignored";
 type ViemConnection = NetworkConnection<"generic">["viem"];
 
-interface Facet {
-  facet: Address;
-  selector: HashString;
-}
-
-interface ChangedFunctions {
-  contractName?: string;
-  facet: Address;
-  selectors: readonly HashString[];
-}
-
-interface SelectorDiff {
-  add: HashString[];
-  replace: HashString[];
-  ignored: HashString[];
-  facet: Address;
-}
-
-interface SelectorInfo {
-  signature: string;
-  contracts: string[];
-}
-
-interface DeploymentReceipt {
-  selector: HashString;
-  signature: string;
-  contract: string;
-}
-
-interface DeploymentFacet {
-  address: Address;
-  blockNumber: bigint;
-  blockHash: string;
-  transactionHash: string;
-  transactionIndex: number;
-  from: Address;
-}
-
-interface DiamondDeployment {
-  diamond: Address;
-  functions: DeploymentReceipt[];
-  owner: Address;
-  blockNumber: bigint;
-  blockHash: string;
-  facets: Record<string, DeploymentFacet>;
-  upgradeHistory: unknown[];
-}
-
-interface MigrationParams {
-  readonly [key: string]: unknown;
-}
-
-export interface MigrationConfig {
-  readonly facetName: string;
-  readonly args: MigrationParams;
+interface DiamondOperationResult {
+  readonly diamondAddress: Address;
+  readonly deployment: DiamondDeployment;
 }
 
 // ============================================================================
-// DiamondChanges Class
+// Main API
 // ============================================================================
 
-export class DiamondChanges {
-  #viem: ViemConnection;
-  #networkName: string;
-  #diamondName: string;
-  #selectorDiffs: Map<string, SelectorDiff>;
-  #removeFunctions: Set<HashString>;
-  #upgradeMode: boolean = false;
-
-  #migration?: MigrationConfig;
-  #deployment?: DiamondDeployment;
-
-  #deployedContracts = new Map<string, GetTransactionReceiptReturnType>();
-  #deployed = false;
-
-  private constructor(
-    viem: ViemConnection,
-    networkName: string,
-    diamondName: string,
-    selectorDiffs: Map<string, SelectorDiff>,
-    removeFunctions: Set<HashString>,
-    upgradeMode: boolean = false,
-    migration?: MigrationConfig,
-    deployment?: DiamondDeployment,
-  ) {
-    this.#viem = viem;
-    this.#networkName = networkName;
-    this.#diamondName = diamondName;
-    this.#selectorDiffs = selectorDiffs;
-    this.#removeFunctions = removeFunctions;
-    this.#upgradeMode = upgradeMode;
-    this.#migration = migration;
-    this.#deployment = deployment;
-  }
-
-  // --------------------------------------------------------------------------
-  // Public Getters
-  // --------------------------------------------------------------------------
-
-  /** Get functions to be added to the diamond */
-  public getAddFunctions(): ChangedFunctions[] {
-    return this.#getChangedFunctions("add");
-  }
-
-  /** Get functions to be replaced in the diamond */
-  public getReplaceFunctions(): ChangedFunctions[] {
-    return this.#getChangedFunctions("replace");
-  }
-
-  /** Get functions to be removed from the diamond */
-  public getRemoveFunctions(): HashString[] {
-    if (!this.#upgradeMode) {
-      throw new Error(
-        "DiamondChanges must be constructed with previous functions to find removals",
-      );
-    }
-    return Array.from(this.#removeFunctions);
-  }
-
-  // --------------------------------------------------------------------------
-  // Private Helpers
-  // --------------------------------------------------------------------------
-
-  async #migrationInfo(
-    diamondAddress: Address,
-  ): Promise<{ isMigrationCompleted: boolean; migrationData: HashString }> {
-    let isMigrationCompleted = false;
-    let migrationData: HashString = "0x";
-
-    if (this.#migration && this.#migration.facetName) {
-      const migrationFacet = await this.#viem.getContractAt(
-        this.#migration!.facetName,
-        diamondAddress,
-      );
-      isMigrationCompleted =
-        (await migrationFacet.read.isMigrationCompleted()) as unknown as boolean;
-
-      if (!isMigrationCompleted) {
-        const artifact = await artifacts.readArtifact(
-          this.#migration.facetName,
-        );
-
-        migrationData = encodeFunctionData({
-          abi: artifact.abi,
-          functionName: "migrate",
-          args: [this.#migration.args],
-        });
-      }
-    }
-    return { isMigrationCompleted, migrationData };
-  }
-
-  /**
-   * Generic method to get changed functions by type
-   * Eliminates code duplication between getAddFunctions and getReplaceFunctions
-   */
-  #getChangedFunctions(
-    type: Exclude<FunctionType, "ignored">,
-  ): ChangedFunctions[] {
-    const result: ChangedFunctions[] = [];
-
-    for (const [contractName, diff] of this.#selectorDiffs) {
-      const selectors = type === "add" ? diff.add : diff.replace;
-      if (selectors.length === 0) continue;
-
-      result.push(
-        this.#deployed
-          ? { contractName, facet: diff.facet, selectors }
-          : { facet: diff.facet, selectors },
-      );
-    }
-
-    return result;
-  }
-
-  /** Build deployment receipt for a selector */
-  async #buildDeploymentReceipt(
-    contractName: string,
-    selector: HashString,
-  ): Promise<DeploymentReceipt> {
-    const { signature } = await this.#lookupSelector(selector);
-    return { selector, signature, contract: contractName };
-  }
-
-  /** Get deployment path for a diamond contract */
-  static #getDeploymentPath(
-    networkName: string,
-    diamondContract: string,
-  ): string {
-    return path.join(
-      hre.config.paths.root,
-      "deployment",
-      networkName,
-      `${diamondContract}.json`,
-    );
-  }
-
-  /** Lookup selector information */
-  async #lookupSelector(selector: string): Promise<SelectorInfo> {
-    const selectors = existsSelectors as Record<
-      string,
-      SelectorInfo | undefined
-    >;
-    return selectors[selector] ?? { signature: selector, contracts: [] };
-  }
-
-  // --------------------------------------------------------------------------
-  // Public Methods
-  // --------------------------------------------------------------------------
-
-  /** Deploy all facet contracts */
-  public async deploy(): Promise<HashString> {
-    const publicClient = await this.#viem.getPublicClient();
-    const [deployWallet] = await this.#viem.getWalletClients();
-
-    let diamondAddress: Address;
-
-    console.log("Deploying facets");
-
-    for (const [contractName, diff] of this.#selectorDiffs) {
-      if (diff.add.length + diff.replace.length === 0) {
-        continue;
-      }
-      console.log(
-        `  - Deploying ${contractName} with ${diff.add.length + diff.replace.length} selector(s)`,
-      );
-
-      const artifact = await artifacts.readArtifact(contractName);
-      const hash = await deployWallet.deployContract({
-        abi: artifact.abi,
-        bytecode: artifact.bytecode as HashString,
-        args: [],
-      });
-
-      console.log(`    ${contractName} deploy hash: ${hash}`);
-
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
-
-      if (!receipt.contractAddress) {
-        throw new Error(`${contractName} deployment failed`);
-      }
-
-      // Update facet address
-      diff.facet = receipt.contractAddress;
-      this.#deployedContracts.set(contractName, receipt);
-
-      console.log(`  ✓ ${contractName} deployed: ${receipt.contractAddress}`);
-    }
-    console.log("Facets deployed");
-
-    if (!this.#upgradeMode) {
-      // Deploy Diamond contract
-      const artifact = await artifacts.readArtifact(this.#diamondName);
-
-      const hash = await deployWallet.deployContract({
-        abi: artifact.abi,
-        bytecode: artifact.bytecode as HashString,
-        args: [this.getAddFunctions(), deployWallet.account.address],
-      });
-
-      console.log(`${artifact.contractName} deploy hash: ${hash}`);
-
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
-
-      if (!receipt.contractAddress) {
-        throw new Error(`${artifact.contractName} deployment failed`);
-      }
-
-      console.log(`${this.#diamondName} deployed: ${receipt.contractAddress}`);
-      await this.saveDeployment(receipt);
-      diamondAddress = receipt.contractAddress;
-
-      const { isMigrationCompleted, migrationData } =
-        await this.#migrationInfo(diamondAddress);
-
-      if (!isMigrationCompleted) {
-        console.log(`Executing migration...`);
-        const diamondUpgrade = await this.#viem.getContractAt(
-          "DiamondUpgradeFacet",
-          diamondAddress,
-        );
-
-        const tx = await diamondUpgrade.write.upgradeDiamond([
-          [],
-          [],
-          [],
-          diamondAddress,
-          migrationData,
-          zeroHash,
-          "0x",
-        ]);
-
-        const receipt = await publicClient.waitForTransactionReceipt({
-          hash: tx,
-        });
-        console.log(
-          `${this.#diamondName} migrated with hash: ${receipt.transactionHash}`,
-        );
-      }
-    } else {
-      // Upgrade existing Diamond
-      diamondAddress = this.#deployment!.diamond;
-
-      if (this.#deployedContracts.size > 0) {
-        const diamondUpgrade = await this.#viem.getContractAt(
-          "DiamondUpgradeFacet",
-          diamondAddress,
-        );
-
-        const { isMigrationCompleted, migrationData } =
-          await this.#migrationInfo(diamondAddress);
-
-        const tx = await diamondUpgrade.write.upgradeDiamond([
-          this.getAddFunctions(),
-          this.getReplaceFunctions(),
-          this.getRemoveFunctions(),
-          isMigrationCompleted ? diamondAddress : zeroAddress,
-          isMigrationCompleted ? migrationData : "0x",
-          zeroHash,
-          "0x",
-        ]);
-
-        const receipt = await publicClient.waitForTransactionReceipt({
-          hash: tx,
-        });
-        console.log(
-          `${this.#diamondName} upgrade ${
-            isMigrationCompleted ? "with migration" : "without migration"
-          } with hash: ${receipt.transactionHash}`,
-        );
-
-        await this.saveDeployment();
-
-        console.log(`Diamond upgraded: ${diamondAddress}`);
-      }
-    }
-
-    this.#deployed = true;
-    return diamondAddress;
-  }
-
-  #getDeployedFacets(
-    existingFacets?: Record<string, DeploymentFacet>,
-  ): Record<string, DeploymentFacet> {
-    const facets: Record<string, DeploymentFacet> = existingFacets ?? {};
-
-    for (const [contractName, receipt] of this.#deployedContracts) {
-      if (receipt.contractAddress) {
-        facets[contractName] = {
-          address: receipt.contractAddress,
-          blockNumber: receipt.blockNumber,
-          blockHash: receipt.blockHash,
-          transactionHash: receipt.transactionHash,
-          transactionIndex: receipt.transactionIndex,
-          from: receipt.from,
-        };
-      }
-    }
-
-    return facets;
-  }
-
-  /** Save deployment information to file */
-  public async saveDeployment(
-    diamondDeployReceipt?: GetTransactionReceiptReturnType,
-  ): Promise<void> {
-    const outputDir = path.join(
-      hre.config.paths.root,
-      "deployment",
-      this.#networkName,
-    );
-    await fs.mkdir(outputDir, { recursive: true });
-
-    const outputPath = DiamondChanges.#getDeploymentPath(
-      this.#networkName,
-      this.#diamondName,
-    );
-    const facetFunctions = await this.#getFacets();
-
-    let deployment: DiamondDeployment;
-
-    if (this.#upgradeMode) {
-      // Upgrade existing deployment
-      const deployed = await fs.readFile(outputPath, "utf-8");
-      const existingDeployment = JSON.parse(deployed) as DiamondDeployment;
-
-      // Merge existing facets with new ones
-      const updatedFacets = this.#getDeployedFacets(existingDeployment.facets);
-
-      deployment = {
-        ...existingDeployment,
-        functions: facetFunctions,
-        facets: updatedFacets,
-      };
-    } else {
-      // New deployment
-      if (!diamondDeployReceipt) {
-        throw new Error(
-          "Diamond deployment receipt is required for new deployments",
-        );
-      }
-
-      deployment = {
-        diamond: diamondDeployReceipt.contractAddress!,
-        functions: facetFunctions,
-        owner: diamondDeployReceipt.from,
-        blockNumber: diamondDeployReceipt.blockNumber,
-        blockHash: diamondDeployReceipt.blockHash,
-        facets: this.#getDeployedFacets(),
-        upgradeHistory: [],
-      };
-    }
-
-    await fs.writeFile(
-      outputPath,
-      JSON.stringify(deployment, this.#jsonReplacer, 2),
-    );
-
-    console.log(`\n💾 Deployment file saved to: ${outputPath}`);
-  }
-
-  /** Display changes and prompt for confirmation */
-  public async verify(): Promise<boolean> {
-    const table = new Table({
-      head: ["Action", "Selector", "Signature", "Facet"],
-    });
-
-    // Add/Replace/Ignored functions
-    for (const [facet, diff] of this.#selectorDiffs) {
-      await this.#addTableRows(table, diff.add, "Added", chalk.blue, facet);
-      await this.#addTableRows(
-        table,
-        diff.replace,
-        "Replaced",
-        chalk.green,
-        facet,
-      );
-      await this.#addTableRows(
-        table,
-        diff.ignored,
-        "Ignored",
-        chalk.gray,
-        facet,
-      );
-    }
-
-    // Remove functions
-    for (const selector of this.#removeFunctions) {
-      const info = await this.#lookupSelector(selector);
-      table.push([
-        chalk.red("Removed"),
-        selector,
-        this.#trimSelector(info.signature),
-        info.contracts.join(", "),
-      ]);
-    }
-
-    if (table.length === 0) {
-      console.log("No changes detected");
-      return false;
-    }
-
-    console.log(table.toString());
-
-    if (this.#migration && this.#migration.facetName) {
-      const diff = this.#selectorDiffs.get(this.#migration.facetName);
-      if (diff && (diff.add.length > 0 || diff.replace.length > 0)) {
-        console.log(
-          chalk.yellow(
-            `\n🚀 Migration scheduled for: ${this.#migration.facetName}`,
-          ),
-        );
-      }
-    }
-
-    return this.#promptUser(
-      "Review the table of Diamond changes. Proceed with upgrade? yN ",
-    );
-  }
-
-  // --------------------------------------------------------------------------
-  // Private Method Helpers
-  // --------------------------------------------------------------------------
-
-  /** Get all facets for deployment */
-  async #getFacets(): Promise<DeploymentReceipt[]> {
-    const facets: DeploymentReceipt[] = [];
-
-    for (const [contractName, diff] of this.#selectorDiffs) {
-      if (diff.add.length + diff.replace.length === 0) {
-        continue;
-      }
-      const receipt = this.#deployedContracts.get(contractName);
-      if (!receipt) {
-        throw new Error(`Facet ${contractName} not deployed`);
-      }
-
-      const selectors = [...diff.add, ...diff.replace];
-      const receipts = await Promise.all(
-        selectors.map((selector) =>
-          this.#buildDeploymentReceipt(contractName, selector),
-        ),
-      );
-
-      facets.push(...receipts);
-    }
-
-    return facets;
-  }
-
-  #trimSelector(selector: string): string {
-    return selector.length > 20 ? `${selector.slice(0, 20)}...` : selector;
-  }
-
-  /** Add table rows for selectors */
-  async #addTableRows(
-    table: Table.Table,
-    selectors: readonly HashString[],
-    action: string,
-    colorFn: (str: string) => string,
-    contractName: string,
-  ): Promise<void> {
-    for (const selector of selectors) {
-      const info = await this.#lookupSelector(selector);
-      table.push([
-        colorFn(action),
-        selector,
-        this.#trimSelector(info.signature),
-        contractName,
-      ]);
-    }
-  }
-
-  /** Prompt user for confirmation */
-  async #promptUser(question: string): Promise<boolean> {
-    const rl = createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
-    try {
-      return await new Promise<boolean>((resolve) => {
-        rl.question(question, (answer) => {
-          const normalized = answer.trim().toLowerCase();
-          resolve(normalized === "y" || normalized === "yes");
-        });
-      });
-    } finally {
-      rl.close();
-    }
-  }
-
-  /** JSON replacer for BigInt and Map */
-  #jsonReplacer = (_key: string, value: unknown): unknown => {
-    if (typeof value === "bigint") {
-      return value.toString();
-    }
-    if (value instanceof Map) {
-      return Object.fromEntries(value);
-    }
-    return value;
-  };
-
-  // --------------------------------------------------------------------------
-  // Static Factory Methods
-  // --------------------------------------------------------------------------
-
-  /** Create DiamondChanges from contract names */
-  public static async create(
-    viem: ViemConnection,
-    networkName: string,
-    diamondName: string,
-    facets: readonly string[],
-    migration: MigrationConfig,
-    upgradeMode: boolean = false,
-  ): Promise<DiamondChanges> {
-    const selectorDiffs = new Map<string, SelectorDiff>();
-    const removeFunctions = new Set<HashString>();
-    const publicClient = await viem.getPublicClient();
-    const deployment = upgradeMode
-      ? await loadDeployment(networkName, diamondName)
-      : undefined;
-
-    let previousFacets: readonly Facet[] | undefined = undefined;
-    if (upgradeMode) {
-      const diamondAddress = deployment!.diamond;
-
-      // Get current facets
-      const diamondInspect = await viem.getContractAt(
-        "DiamondInspectFacet",
-        diamondAddress,
-      );
-      previousFacets = await diamondInspect.read.functionFacetPairs();
-    }
-
-    // Process each facet
-    if (migration.facetName && !facets.includes(migration.facetName)) {
-      facets = [...facets, migration.facetName];
-    }
-    for (const facet of facets) {
-      const diff: SelectorDiff = {
-        add: [],
-        replace: [],
-        ignored: [],
-        facet: zeroAddress,
-      };
-      let onchainBytecode: HashString | undefined = undefined;
-      if (upgradeMode) {
-        onchainBytecode = deployment!.facets[facet]
-          ? await publicClient.getCode({
-              address: deployment!.facets[facet]!.address as Address,
-            })
-          : undefined;
-      }
-
-      const artifact = await artifacts.readArtifact(facet);
-      const signatures = this.#getSignatures(artifact.abi as Abi);
-      const localBytecode = artifact.deployedBytecode as HashString;
-      const facetChanged = onchainBytecode !== localBytecode;
-
-      for (const signature of signatures) {
-        const selector = toFunctionSelector(signature);
-
-        // For new deployments: include all functions
-        if (!upgradeMode) {
-          diff.add.push(selector);
-          continue;
-        }
-
-        // For existing deployments: skip unchanged functions to ignored
-        if (upgradeMode && !facetChanged) {
-          diff.ignored.push(selector);
-          continue;
-        }
-
-        const exists = previousFacets?.some(
-          (item) => item.selector === selector,
-        );
-        (exists ? diff.replace : diff.add).push(selector);
-      }
-      selectorDiffs.set(facet, diff);
-    }
-
-    return new DiamondChanges(
-      viem,
-      networkName,
-      diamondName,
-      selectorDiffs,
-      removeFunctions,
-      upgradeMode,
-      migration,
-      deployment,
-    );
-  }
-
-  /** Get function signatures from ABI */
-  static #getSignatures(abi: Abi): AbiFunction[] {
-    return abi.filter((item): item is AbiFunction => item.type === "function");
-  }
-}
-
-// ============================================================================
-// Utility Functions
-// ============================================================================
-
-/** Load deployment configuration from file */
-export async function loadDeployment(
-  networkName: string,
-  diamondContract: string,
-): Promise<DiamondDeployment> {
-  try {
-    const deploymentPath = path.join(
-      hre.config.paths.root,
-      "deployment",
-      networkName,
-      `${diamondContract}.json`,
-    );
-    const content = await fs.readFile(deploymentPath, "utf-8");
-    return JSON.parse(content) as DiamondDeployment;
-  } catch (error) {
-    throw new Error(`Deployment not found for network: ${networkName}`);
-  }
-}
-
-/** Deploy a new Diamond proxy with facets */
+/**
+ * Deploy a new Diamond contract
+ */
 export async function deployDiamond(
   viem: ViemConnection,
   networkName: string,
-  diamondName: string,
-  facets: readonly string[],
-  migration: MigrationConfig,
-): Promise<Address | undefined> {
+  config: DiamondConfig,
+): Promise<DiamondOperationResult | undefined> {
+  // Run selectors task first
   await hre.tasks.getTask("selectors").run();
 
-  console.log(`Deploying ${diamondName} to ${networkName}...`);
+  logOperationStart(config.name, networkName, false);
 
-  const changes = await DiamondChanges.create(
-    viem,
-    networkName,
-    diamondName,
-    facets,
-    migration,
-    false,
+  const publicClient = await viem.getPublicClient();
+  const [walletClient] = await viem.getWalletClients();
+
+  // Ensure migration facet is included
+  const allFacets = ensureMigrationFacet(
+    config.facets,
+    config.migration?.facetName,
   );
-  const shouldDeploy = await changes.verify();
 
-  if (!shouldDeploy) {
-    console.log("Deployment aborted");
-    return;
+  // Compute diff (for new deployment, everything is an add)
+  const diff = await computeDiamondDiff(
+    publicClient,
+    allFacets,
+    undefined, // No existing deployment
+    undefined, // No on-chain facets
+  );
+
+  // Confirm with user
+  const confirmed = await confirmChanges(diff, false, config.migration);
+  if (!confirmed) {
+    console.log("Deployment cancelled.");
+    return undefined;
   }
 
-  const diamondAddress = await changes.deploy();
+  // Deploy all facets
+  const deployedFacets = await deployFacets(
+    publicClient,
+    walletClient,
+    diff.adds,
+    diff.replaces,
+  );
 
-  return diamondAddress;
+  // Build facet functions array for diamond constructor
+  const facetFunctions = toFacetFunctions(deployedFacets, diff.adds);
+
+  // Deploy the diamond contract
+  const diamondResult = await deployDiamondContract(
+    publicClient,
+    walletClient,
+    config.name,
+    facetFunctions,
+    walletClient.account.address,
+  );
+
+  // Execute migration if configured
+  if (config.migration?.facetName) {
+    const migrationPrep = await prepareMigration(
+      publicClient,
+      diamondResult.address,
+      config.migration,
+    );
+
+    if (migrationPrep.willExecute) {
+      await executeDiamondUpgrade(
+        publicClient,
+        walletClient,
+        diamondResult.address,
+        [], // No adds
+        [], // No replaces
+        [], // No removes
+        migrationPrep.delegate,
+        migrationPrep.calldata,
+      );
+    }
+  }
+
+  // Build and save deployment
+  const functions = buildDeploymentFunctions(deployedFacets);
+  const deployment = createDeployment({
+    diamondAddress: diamondResult.address,
+    owner: walletClient.account.address,
+    blockNumber: diamondResult.blockNumber,
+    blockHash: diamondResult.blockHash,
+    functions,
+    facets: toDeploymentFacets(deployedFacets),
+  });
+
+  await saveDeployment(networkName, config.name, deployment);
+  logOperationComplete(diamondResult.address, false);
+
+  return {
+    diamondAddress: diamondResult.address,
+    deployment,
+  };
 }
 
-/** Upgrade an existing Diamond proxy */
+/**
+ * Upgrade an existing Diamond contract
+ */
 export async function upgradeDiamond(
   viem: ViemConnection,
   networkName: string,
-  diamondName: string,
-  facets: readonly string[],
-  migration: MigrationConfig,
-): Promise<Address | undefined> {
+  config: DiamondConfig,
+): Promise<DiamondOperationResult | undefined> {
+  // Run selectors task first
   await hre.tasks.getTask("selectors").run();
 
-  console.log(`Upgrading ${diamondName} on ${networkName}...`);
+  logOperationStart(config.name, networkName, true);
 
-  // Determine changes
-  const changes = await DiamondChanges.create(
-    viem,
-    networkName,
-    diamondName,
-    facets,
-    migration,
-    true,
+  const publicClient = await viem.getPublicClient();
+  const [walletClient] = await viem.getWalletClients();
+
+  // Load existing deployment
+  const existingDeployment = await loadDeployment(networkName, config.name);
+
+  // Get on-chain function facet pairs
+  const diamondInspect = await viem.getContractAt(
+    "DiamondInspectFacet",
+    existingDeployment.diamond,
   );
-  const shouldUpgrade = await changes.verify();
+  const onChainFacets =
+    (await diamondInspect.read.functionFacetPairs()) as readonly FunctionFacetPair[];
 
-  if (!shouldUpgrade) {
-    console.log("Upgrade aborted");
-    return;
+  // Ensure migration facet is included
+  const allFacets = ensureMigrationFacet(
+    config.facets,
+    config.migration?.facetName,
+  );
+
+  // Compute diff
+  const diff = await computeDiamondDiff(
+    publicClient,
+    allFacets,
+    existingDeployment,
+    onChainFacets,
+  );
+
+  // Confirm with user
+  const confirmed = await confirmChanges(diff, true, config.migration);
+  if (!confirmed) {
+    console.log("Upgrade cancelled.");
+    return undefined;
   }
 
-  const diamondAddress = await changes.deploy();
+  // Check if there are any changes to apply
+  if (!diff.hasChanges) {
+    console.log("No changes to apply.");
+    return {
+      diamondAddress: existingDeployment.diamond,
+      deployment: existingDeployment,
+    };
+  }
 
-  return diamondAddress;
+  // Deploy changed facets
+  const deployedFacets = await deployFacets(
+    publicClient,
+    walletClient,
+    diff.adds,
+    diff.replaces,
+  );
+
+  // Build facet functions arrays for upgrade
+  const addFunctions = toFacetFunctions(deployedFacets, diff.adds);
+  const replaceFunctions = toFacetFunctions(deployedFacets, diff.replaces);
+
+  // Prepare migration
+  const migrationPrep = await prepareMigration(
+    publicClient,
+    existingDeployment.diamond,
+    config.migration,
+  );
+
+  // Execute the upgrade
+  const upgradeResult = await executeDiamondUpgrade(
+    publicClient,
+    walletClient,
+    existingDeployment.diamond,
+    addFunctions,
+    replaceFunctions,
+    diff.removes,
+    migrationPrep.delegate,
+    migrationPrep.calldata,
+  );
+
+  // Build new deployment functions
+  const newAddedFunctions = buildDeploymentFunctions(
+    deployedFacets.filter((f) =>
+      diff.adds.some((a) => a.contractName === f.contractName),
+    ),
+  );
+  const newReplacedFunctions = buildDeploymentFunctions(
+    deployedFacets.filter((f) =>
+      diff.replaces.some((r) => r.contractName === f.contractName),
+    ),
+  );
+
+  const newFunctions = mergeDeploymentFunctions(
+    existingDeployment.functions,
+    newAddedFunctions,
+    newReplacedFunctions,
+    diff.removes,
+  );
+
+  // Create upgrade record
+  const upgradeRecord = createUpgradeRecord({
+    blockNumber: upgradeResult.blockNumber,
+    transactionHash: upgradeResult.transactionHash,
+    added: newAddedFunctions,
+    replaced: newReplacedFunctions,
+    removed: diff.removes,
+    migrationExecuted: upgradeResult.migrationExecuted,
+  });
+
+  // Update and save deployment
+  const updatedDeployment = updateDeploymentForUpgrade(existingDeployment, {
+    newFunctions,
+    newFacets: toDeploymentFacets(deployedFacets),
+    upgradeRecord,
+  });
+
+  await saveDeployment(networkName, config.name, updatedDeployment);
+  logOperationComplete(existingDeployment.diamond, true);
+
+  return {
+    diamondAddress: existingDeployment.diamond,
+    deployment: updatedDeployment,
+  };
+}
+
+/**
+ * Smart deploy/upgrade: deploys if not exists, upgrades if exists
+ */
+export async function deployOrUpgrade(
+  viem: ViemConnection,
+  networkName: string,
+  config: DiamondConfig,
+): Promise<DiamondOperationResult | undefined> {
+  const exists = await deploymentExists(networkName, config.name);
+
+  if (exists) {
+    return upgradeDiamond(viem, networkName, config);
+  } else {
+    return deployDiamond(viem, networkName, config);
+  }
+}
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Ensure migration facet is included in the facet list
+ */
+function ensureMigrationFacet(
+  facets: readonly string[],
+  migrationFacetName: string | undefined,
+): readonly string[] {
+  if (!migrationFacetName) return facets;
+  if (facets.includes(migrationFacetName)) return facets;
+  return [...facets, migrationFacetName];
 }
