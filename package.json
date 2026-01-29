@@ -2,12 +2,18 @@
   "name": "diamond-hardhat-template",
   "version": "1.0.0",
   "type": "module",
+  "author": {
+    "name": "Conight",
+    "url": "https://github.com/Conight"
+  },
+  "description": "A sophisticated, production-ready template for building modular and upgradeable smart contracts using the Diamond Standard",
   "scripts": {
     "generate": "wagmi generate",
     "prettier": "prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol'",
     "lint": "prettier --list-different --plugin=prettier-plugin-solidity 'contracts/**/*.sol'",
     "test": "hardhat test",
-    "compile": "hardhat compile"
+    "compile": "hardhat compile",
+    "selectors": "hardhat selectors"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox-viem": "^5.0.2",

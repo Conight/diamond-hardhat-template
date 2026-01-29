@@ -1,5 +1,6 @@
 import hardhatToolboxViemPlugin from "@nomicfoundation/hardhat-toolbox-viem";
 import { configVariable, defineConfig, task } from "hardhat/config";
+import { bscTestnet } from "viem/chains";
 
 const selectors = task("selectors", "Generate new selectors file")
   .addFlag({

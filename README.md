@@ -117,6 +117,13 @@ This template uses the **Diamond Standard (EIP-2535)**. Diamonds are multi-facet
 - **Diamond**: The main contract that delegates calls to facets based on function selectors.
 - **Inspect**: A set of functions to inspect facets and their supported selectors (implemented in `DiamondInspectFacet`).
 
+---
+
+## 📝 TODO
+
+- [ ] Explore [OpenZeppelin Relayer](https://github.com/OpenZeppelin/openzeppelin-relayer) for meta-transaction support.
+- [ ] Integrate [OpenZeppelin Monitor](https://github.com/OpenZeppelin/openzeppelin-monitor) for automated contract monitoring.
+
 ## 📜 License
 
 This project is licensed under the MIT License.
