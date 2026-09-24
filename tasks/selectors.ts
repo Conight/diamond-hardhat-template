@@ -14,7 +14,7 @@ export default async function selectorsTask(
   hre: HardhatRuntimeEnvironment,
 ): Promise<void> {
   await hre.tasks.getTask("compile").run();
-  const connection = await hre.network.connect("hardhatMainnet");
+  const connection = await hre.network.create("hardhatMainnet");
   try {
     const client = await connection.viem.getPublicClient();
     const index: Record<string, { signature: string; contracts: string[] }> =

@@ -28,7 +28,7 @@ import type {
 
 const approve: OperationOptions = { confirm: async () => true };
 async function setup(t: TestContext) {
-  const connection = await network.connect("hardhatMainnet");
+  const connection = await network.create("hardhatMainnet");
   const { viem } = connection;
   const client = await viem.getPublicClient();
   const [owner, other] = await viem.getWalletClients();

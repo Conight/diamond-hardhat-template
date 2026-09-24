@@ -8,9 +8,9 @@ Credit for the core contracts and architecture belongs to **Perfect Abstractions
 
 ## Requirements
 
-- Node.js **22.10+** (Node.js 24 LTS recommended)
-- pnpm **10.28.1**
-- Solidity 0.8.33 is downloaded by Hardhat. Both compiler profiles use the optimizer, viaIR, and the Prague EVM target, matching the upstream EVM requirement.
+- Node.js **22.13+** (Node.js 24 LTS recommended)
+- pnpm **12.6.0**
+- Solidity 0.8.37 is downloaded by Hardhat. Both compiler profiles use the optimizer, viaIR, and the Prague EVM target, matching the upstream EVM requirement.
 
 ```bash
 pnpm install --frozen-lockfile
