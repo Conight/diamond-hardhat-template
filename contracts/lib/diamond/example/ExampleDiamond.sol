@@ -6,7 +6,7 @@ pragma solidity >=0.8.30;
  */
 
 import "../DiamondMod.sol" as DiamondMod;
-import "../../access/Owner/OwnerMod.sol" as OwnerMod;
+import "../../access/Owner/Data/OwnerDataMod.sol" as OwnerDataMod;
 import "../../token/ERC721/Metadata/ERC721MetadataMod.sol" as ERC721MetadataMod;
 import "../../interfaceDetection/ERC165/ERC165Mod.sol" as ERC165Mod;
 import {IERC721} from "../../interfaces/IERC721.sol";
@@ -14,20 +14,13 @@ import {IERC721Metadata} from "../../interfaces/IERC721Metadata.sol";
 
 contract ExampleDiamond {
     /**
-     * @notice Struct to hold facet address and its function selectors.
-     * struct FacetFunctions {
-     *     address facet;
-     *     bytes4[] selectors;
-     * }
-     */
-    /**
      * @notice Initializes the diamond contract with facets, owner and other data.
      * @dev Adds all provided facets to the diamond's function selector mapping and sets the contract owner.
      *      Each facet in the array will have its function selectors registered to enable delegatecall routing.
      * @param _facets Array of facet addresses and their corresponding function selectors to add to the diamond.
      * @param _diamondOwner Address that will be set as the owner of the diamond contract.
      */
-    constructor(DiamondMod.FacetFunctions[] memory _facets, address _diamondOwner) {
+    constructor(address[] memory _facets, address _diamondOwner) {
         DiamondMod.addFacets(_facets);
 
         /*************************************
@@ -37,7 +30,7 @@ contract ExampleDiamond {
         /**
          * Setting the contract owner
          */
-        OwnerMod.setContractOwner(_diamondOwner);
+        OwnerDataMod.setContractOwner(_diamondOwner);
         /**
          * Setting ERC721 token details
          */

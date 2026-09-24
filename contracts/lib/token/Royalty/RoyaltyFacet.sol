@@ -16,7 +16,7 @@ contract RoyaltyFacet {
     /**
      * @notice Storage slot identifier for royalty storage.
      */
-    bytes32 constant STORAGE_POSITION = keccak256("compose.erc2981");
+    bytes32 constant STORAGE_POSITION = keccak256("erc2981");
 
     /**
      * @dev The denominator with which to interpret royalty fees as a percentage of sale price.
@@ -36,7 +36,7 @@ contract RoyaltyFacet {
     }
 
     /**
-     * @custom:storage-location erc8042:compose.erc2981
+     * @custom:storage-location erc8042:erc2981
      */
     struct RoyaltyStorage {
         RoyaltyInfo defaultRoyaltyInfo;
@@ -79,5 +79,14 @@ contract RoyaltyFacet {
 
         receiver = royalty.receiver;
         royaltyAmount = (_salePrice * royalty.royaltyFraction) / FEE_DENOMINATOR;
+    }
+
+    /**
+     * @notice Exports the function selectors of the RoyaltyFacet.
+     * @dev Used as the selector discovery mechanism for diamonds.
+     * @return selectors The exported function selectors of the RoyaltyFacet.
+     */
+    function exportSelectors() external pure returns (bytes memory selectors) {
+        return bytes.concat(this.royaltyInfo.selector);
     }
 }

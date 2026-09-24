@@ -13,7 +13,7 @@ contract ERC20DataFacet {
 
     /**
      * @dev ERC-8042 compliant storage struct for ERC20 token data.
-     * @custom:storage-location erc8042:erc20.transfer
+     * @custom:storage-location erc8042:erc20
      */
     struct ERC20Storage {
         mapping(address owner => uint256 balance) balanceOf;
@@ -58,5 +58,14 @@ contract ERC20DataFacet {
      */
     function allowance(address _owner, address _spender) external view returns (uint256) {
         return getStorage().allowance[_owner][_spender];
+    }
+
+    /**
+     * @notice Exports the function selectors of the ERC20Data facet
+     * @dev This function is use as a selector discovery mechanism for diamonds
+     * @return selectors The exported function selectors of the ERC20DataFacet
+     */
+    function exportSelectors() external pure returns (bytes memory) {
+        return bytes.concat(this.totalSupply.selector, this.balanceOf.selector, this.allowance.selector);
     }
 }

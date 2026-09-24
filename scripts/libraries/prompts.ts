@@ -1,209 +1,53 @@
-/**
- * Diamond Deployment Prompts
- *
- * User interaction utilities for displaying changes and confirming operations.
- */
-
 import Table from "cli-table3";
 import chalk from "chalk";
-import { createInterface } from "node:readline";
-import type {
-  DiamondDiff,
-  FacetFunctionsWithName,
-  MigrationConfig,
-  Selector,
-} from "./types.js";
-import { getSelectorSignature } from "./executor.js";
+import { createInterface } from "node:readline/promises";
+import type { OperationPlan } from "./types.js";
 
-// ============================================================================
-// Change Display
-// ============================================================================
-
-/**
- * Display Diamond changes in a formatted table
- */
-export async function displayChanges(
-  diff: DiamondDiff,
-  migration?: MigrationConfig,
-): Promise<void> {
-  const table = new Table({
-    head: [
-      chalk.bold("Action"),
-      chalk.bold("Selector"),
-      chalk.bold("Signature"),
-      chalk.bold("Facet"),
-    ],
-    colWidths: [12, 14, 45, 25],
-    wordWrap: true,
-  });
-
-  // Add functions
-  for (const facet of diff.adds) {
-    addTableRows(table, facet, "Add", chalk.green);
+export function displayChanges({ diff, migration }: OperationPlan): void {
+  const table = new Table({ head: ["Action", "Facet", "Functions"] });
+  for (const facet of diff.adds)
+    table.push([
+      chalk.green("Add"),
+      facet.contractName,
+      facet.selectors.length,
+    ]);
+  for (const { previous, next } of diff.replaces) {
+    const added = next.selectors.filter(
+      (s) => !previous.selectors.includes(s),
+    ).length;
+    const removed = previous.selectors.filter(
+      (s) => !next.selectors.includes(s),
+    ).length;
+    table.push([
+      chalk.yellow("Replace"),
+      `${previous.contractName} → ${next.contractName}`,
+      `${next.selectors.length} (+${added}, -${removed})`,
+    ]);
   }
-
-  // Replace functions
-  for (const facet of diff.replaces) {
-    addTableRows(table, facet, "Replace", chalk.yellow);
-  }
-
-  // Removed functions
-  for (const selector of diff.removes) {
+  for (const facet of diff.removes)
     table.push([
       chalk.red("Remove"),
-      selector,
-      truncate(getSelectorSignature(selector), 42),
-      chalk.gray("(removed)"),
+      facet.contractName,
+      facet.selectors.length,
     ]);
-  }
-
-  // Unchanged functions (collapsed)
-  if (diff.unchanged.length > 0) {
-    const totalUnchanged = diff.unchanged.reduce(
-      (sum, f) => sum + f.selectors.length,
-      0,
-    );
+  for (const facet of diff.unchanged)
     table.push([
       chalk.gray("Unchanged"),
-      chalk.gray("..."),
-      chalk.gray(`${totalUnchanged} function(s) unchanged`),
-      chalk.gray("..."),
-    ]);
-  }
-
-  if (table.length === 0) {
-    console.log(chalk.yellow("\n⚠️  No changes detected.\n"));
-    return;
-  }
-
-  console.log("\n📋 Diamond Changes:\n");
-  console.log(table.toString());
-
-  // Display migration info
-  if (migration?.facetName) {
-    const hasMigrationChanges = [...diff.adds, ...diff.replaces].some(
-      (f) => f.contractName === migration.facetName,
-    );
-    if (hasMigrationChanges) {
-      console.log(
-        chalk.cyan(`\n🚀 Migration scheduled: ${migration.facetName}`),
-      );
-    }
-  }
-
-  // Summary
-  const addCount = diff.adds.reduce((sum, f) => sum + f.selectors.length, 0);
-  const replaceCount = diff.replaces.reduce(
-    (sum, f) => sum + f.selectors.length,
-    0,
-  );
-  const removeCount = diff.removes.length;
-
-  console.log(
-    chalk.dim(
-      `\nSummary: ${addCount} add, ${replaceCount} replace, ${removeCount} remove`,
-    ),
-  );
-}
-
-/**
- * Add rows for a facet's selectors to the table
- */
-function addTableRows(
-  table: Table.Table,
-  facet: FacetFunctionsWithName,
-  action: string,
-  colorFn: (str: string) => string,
-): void {
-  for (const selector of facet.selectors) {
-    const signature = getSelectorSignature(selector);
-    table.push([
-      colorFn(action),
-      selector,
-      truncate(signature, 42),
       facet.contractName,
+      facet.selectors.length,
     ]);
-  }
+  console.log(table.toString());
+  if (migration) console.log(`Migration: ${migration}`);
 }
-
-/**
- * Truncate a string with ellipsis
- */
-function truncate(str: string, maxLength: number): string {
-  if (str.length <= maxLength) return str;
-  return `${str.slice(0, maxLength - 3)}...`;
-}
-
-// ============================================================================
-// User Prompts
-// ============================================================================
-
-/**
- * Prompt user for confirmation
- */
-export async function promptConfirmation(question: string): Promise<boolean> {
-  const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
+export async function confirmChanges(plan: OperationPlan): Promise<boolean> {
+  displayChanges(plan);
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
   try {
-    return await new Promise<boolean>((resolve) => {
-      rl.question(chalk.cyan(`\n${question} (y/N): `), (answer) => {
-        const normalized = answer.trim().toLowerCase();
-        resolve(normalized === "y" || normalized === "yes");
-      });
-    });
+    const answer = await rl.question(
+      `Proceed with ${plan.isUpgrade ? "upgrade" : "deployment"}? (y/N): `,
+    );
+    return ["y", "yes"].includes(answer.trim().toLowerCase());
   } finally {
     rl.close();
   }
-}
-
-/**
- * Display changes and prompt for confirmation
- */
-export async function confirmChanges(
-  diff: DiamondDiff,
-  isUpgrade: boolean,
-  migration?: MigrationConfig,
-): Promise<boolean> {
-  if (!diff.hasChanges) {
-    console.log(chalk.yellow("\n⚠️  No changes to apply.\n"));
-    return false;
-  }
-
-  await displayChanges(diff, migration);
-
-  const action = isUpgrade ? "upgrade" : "deployment";
-  return promptConfirmation(`Proceed with ${action}?`);
-}
-
-// ============================================================================
-// Progress Logging
-// ============================================================================
-
-/**
- * Log operation start
- */
-export function logOperationStart(
-  diamondName: string,
-  networkName: string,
-  isUpgrade: boolean,
-): void {
-  const operation = isUpgrade ? "Upgrading" : "Deploying";
-  console.log(
-    chalk.bold(`\n💎 ${operation} ${diamondName} on ${networkName}\n`),
-  );
-}
-
-/**
- * Log operation complete
- */
-export function logOperationComplete(
-  diamondAddress: string,
-  isUpgrade: boolean,
-): void {
-  const operation = isUpgrade ? "Upgrade" : "Deployment";
-  console.log(chalk.green(`\n✅ ${operation} complete!`));
-  console.log(chalk.dim(`   Diamond: ${diamondAddress}\n`));
 }

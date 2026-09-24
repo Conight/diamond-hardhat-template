@@ -1,215 +1,127 @@
 import { defineConfig } from "@wagmi/cli";
-import { readFileSync, readdirSync, statSync, existsSync } from "fs";
-import { join, basename, extname } from "path";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { join } from "node:path";
 import type { Abi, Address } from "viem";
+import { formatAbiItem } from "viem/utils";
+import { buildDiamondAbi } from "./scripts/libraries/abi.js";
+import type { DiamondDeployment } from "./scripts/libraries/types.js";
 
-/**
- * Diamond-Standard Configuration
- *
- * Capabilities:
- * 1. Auto-Discovery: Scans `deployment/` for ANY contract that looks like a Diamond.
- * 2. Multi-Chain Aggregation: Aggregates deployments across all networks.
- * 3. Superset ABIs: Merges Facets from ALL chains into a single "Master Interface".
- * 4. Start Block Extraction: Exports deployment block numbers for Indexers.
- */
-
-// --- Constants ---
-const PROJECT_ROOT = process.cwd();
-const ARTIFACTS_DIR = join(PROJECT_ROOT, "artifacts", "contracts");
-const DEPLOYMENTS_DIR = join(PROJECT_ROOT, "deployment");
-
-// Network -> ChainID Mapping
-const NETWORK_TO_CHAIN_ID: Record<string, number> = {
-  localhost: 31337,
-};
-
-// --- Types ---
-interface DeploymentData {
-  diamond: Address;
-  blockNumber: string | number;
-  facets: Record<string, { address: Address }>;
-}
-
-interface ContractMeta {
-  addresses: Record<number, Address>;
-  blockCreated: Record<number, number>;
-  chainNames: Record<number, string>;
-  uniqueFacets: Set<string>;
-}
-
-// --- Helpers ---
-
-function findArtifactPath(dir: string, contractName: string): string | null {
-  if (!existsSync(dir)) return null;
-  const entries = readdirSync(dir);
-  for (const entry of entries) {
-    const fullPath = join(dir, entry);
-    const stat = statSync(fullPath);
-    if (stat.isDirectory()) {
-      const found = findArtifactPath(fullPath, contractName);
-      if (found) return found;
-    } else if (entry === `${contractName}.json`) {
-      return fullPath;
+const artifactsDir = join(process.cwd(), "artifacts/contracts");
+const deploymentsDir = join(process.cwd(), "deployment");
+const artifactPaths = new Map<string, string[]>();
+function collectArtifacts(directory: string): void {
+  if (!existsSync(directory)) return;
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const file = join(directory, entry.name);
+    if (entry.isDirectory()) collectArtifacts(file);
+    else if (entry.name.endsWith(".json")) {
+      const name = entry.name.slice(0, -5);
+      artifactPaths.set(name, [...(artifactPaths.get(name) ?? []), file]);
     }
   }
-  return null;
 }
-
-function loadAbi(contractName: string): Abi {
-  const path = findArtifactPath(ARTIFACTS_DIR, contractName);
-  if (!path) return [];
-  try {
-    return JSON.parse(readFileSync(path, "utf-8")).abi as Abi;
-  } catch (error) {
-    console.error(`❌ Error parsing artifact ${contractName}:`, error);
-    return [];
-  }
-}
-
-function mergeAbis(abis: Abi[]): Abi {
-  const uniqueItems = new Map<string, any>();
-  for (const abi of abis) {
-    for (const item of abi) {
-      if (
-        item.type === "function" ||
-        item.type === "event" ||
-        item.type === "error"
-      ) {
-        const inputs =
-          "inputs" in item ? item.inputs.map((i: any) => i.type).join(",") : "";
-        const key = `${item.type}:${item.name}(${inputs})`;
-        if (!uniqueItems.has(key)) uniqueItems.set(key, item);
-      } else {
-        const key = JSON.stringify(item);
-        if (!uniqueItems.has(key)) uniqueItems.set(key, item);
-      }
-    }
-  }
-  return Array.from(uniqueItems.values());
-}
-
-/**
- * Scans deployments, extracts Metadata (Address / Block).
- */
-function scanDeployments() {
-  const contracts = new Map<string, ContractMeta>();
-
-  if (!existsSync(DEPLOYMENTS_DIR)) return contracts;
-
-  const networks = readdirSync(DEPLOYMENTS_DIR);
-
-  for (const network of networks) {
-    const networkPath = join(DEPLOYMENTS_DIR, network);
-    if (!statSync(networkPath).isDirectory()) continue;
-
-    const chainId = NETWORK_TO_CHAIN_ID[network];
-    if (!chainId) {
-      console.warn(
-        `⚠️  Skipping network "${network}": Add ID to NETWORK_TO_CHAIN_ID map.`,
-      );
-      continue;
-    }
-
-    const files = readdirSync(networkPath).filter(
-      (f) => extname(f) === ".json",
+collectArtifacts(artifactsDir);
+function loadAbi(name: string): Abi {
+  const paths = artifactPaths.get(name) ?? [];
+  if (paths.length !== 1)
+    throw new Error(
+      `Expected one artifact for ${name}, found ${paths.length}. Run pnpm compile.`,
     );
+  return JSON.parse(readFileSync(paths[0], "utf8")).abi;
+}
 
-    for (const file of files) {
-      const contractName = basename(file, ".json");
-      const filePath = join(networkPath, file);
-
-      try {
-        const data = JSON.parse(
-          readFileSync(filePath, "utf-8"),
-        ) as DeploymentData;
-
-        if (data.diamond && data.facets) {
-          if (!contracts.has(contractName)) {
-            contracts.set(contractName, {
-              addresses: {},
-              blockCreated: {},
-              chainNames: {},
-              uniqueFacets: new Set([contractName]),
-            });
-          }
-
-          const meta = contracts.get(contractName)!;
-          meta.addresses[chainId] = data.diamond;
-          meta.blockCreated[chainId] = Number(data.blockNumber) || 0;
-          meta.chainNames[chainId] = network;
-          Object.keys(data.facets).forEach((facet) =>
-            meta.uniqueFacets.add(facet),
-          );
-        }
-      } catch (e) {
-        console.warn(`❌ Failed to process ${file} in ${network}`);
+const contracts = new Map<
+  string,
+  {
+    addresses: Record<number, Address>;
+    blocks: Record<number, string>;
+    abis: Abi[];
+  }
+>();
+if (existsSync(deploymentsDir)) {
+  for (const network of readdirSync(deploymentsDir, { withFileTypes: true })) {
+    if (!network.isDirectory()) continue;
+    const directory = join(deploymentsDir, network.name);
+    for (const file of readdirSync(directory).filter((f) =>
+      f.endsWith(".json"),
+    )) {
+      const data = JSON.parse(
+        readFileSync(join(directory, file), "utf8"),
+      ) as DiamondDeployment;
+      if (
+        data.version !== 3 ||
+        data.standard !== "ERC-8153" ||
+        !Number.isSafeInteger(data.chainId)
+      ) {
+        throw new Error(
+          `${network.name}/${file}: expected an ERC-8153 deployment record`,
+        );
       }
+      const name = file.slice(0, -5);
+      const entry = contracts.get(name) ?? {
+        addresses: {},
+        blocks: {},
+        abis: [],
+      };
+      if (
+        entry.addresses[data.chainId] &&
+        entry.addresses[data.chainId].toLowerCase() !==
+          data.diamond.toLowerCase()
+      ) {
+        throw new Error(
+          `${name}: multiple deployment addresses for chain ${data.chainId}`,
+        );
+      }
+      entry.addresses[data.chainId] = data.diamond;
+      entry.blocks[data.chainId] = data.blockNumber;
+      entry.abis.push(
+        buildDiamondAbi(
+          loadAbi(name),
+          Object.entries(data.facets).map(([facetName, facet]) => ({
+            abi: loadAbi(facetName),
+            selectors: facet.selectors,
+          })),
+        ),
+      );
+      contracts.set(name, entry);
     }
   }
-
-  return contracts;
 }
-
-// --- Execution ---
-
-console.log("💎 Wagmi Generator Starting...");
-const detectedContracts = scanDeployments();
-const wagmiContracts: any[] = [];
-const extraExports: string[] = []; // We will inject block numbers here
-
-for (const [name, meta] of detectedContracts.entries()) {
-  const facetCount = meta.uniqueFacets.size;
-
-  console.log(`\n📦 Contract: ${name}`);
-  console.table(
-    Object.entries(meta.addresses).map(([chainId, addr]) => {
-      const id = Number(chainId);
-      return {
-        Chain: `${meta.chainNames[id]}(${id})`,
-        DiamondAddress: addr,
-        StartBlock: meta.blockCreated[id],
-      };
-    }),
+if (contracts.size === 0)
+  throw new Error(
+    "No ERC-8153 deployments found. Deploy a diamond before generating client ABIs.",
   );
-  console.log(`   --> Merging ${facetCount} Facets into Superset ABI...`);
 
-  const unifiedAbi = mergeAbis(Array.from(meta.uniqueFacets).map(loadAbi));
-
-  wagmiContracts.push({
-    name: name,
-    address: meta.addresses,
-    abi: unifiedAbi,
-  });
-
-  // Generate the Start Block Map manually
-  const camelName = name.charAt(0).toLowerCase() + name.slice(1);
-  extraExports.push(
-    `export const ${camelName}StartBlock = ${JSON.stringify(
-      meta.blockCreated,
-    )} as const;`,
-  );
+// Each chain contributes only its routed functions. Canonical signatures preserve tuple overloads.
+function mergeAbis(abis: Abi[]): Abi {
+  const items = new Map<string, Abi[number]>();
+  for (const item of abis.flat()) {
+    const key =
+      item.type === "function" || item.type === "event" || item.type === "error"
+        ? `${item.type}:${formatAbiItem(item)}`
+        : item.type;
+    items.set(key, item);
+  }
+  return [...items.values()];
 }
-
-/**
- * Custom Plugin to inject extra metadata
- */
-function metadataPlugin() {
-  return {
-    name: "metadata-plugin",
-    run: async () => {
-      // This plugin runs after generation, but Wagmi plugins usually return content.
-      // We will simply return the extra exports as a "content" block to be appended?
-      // Actually, Wagmi plugins don't easily append to the main file unless we use the 'actions' API.
-      // A simpler hack: We return a standard script with the extra data.
-      return {
-        content: extraExports.join("\n"),
-      };
-    },
-  };
-}
-
 export default defineConfig({
   out: "abi.ts",
-  contracts: wagmiContracts,
-  plugins: [metadataPlugin()],
+  contracts: [...contracts].map(([name, entry]) => ({
+    name,
+    address: entry.addresses,
+    abi: mergeAbis(entry.abis),
+  })),
+  plugins: [
+    {
+      name: "deployment-blocks",
+      run: async () => ({
+        content: [...contracts]
+          .map(
+            ([name, entry]) =>
+              `export const ${name[0].toLowerCase() + name.slice(1)}StartBlock = ${JSON.stringify(entry.blocks)} as const;`,
+          )
+          .join("\n"),
+      }),
+    },
+  ],
 });

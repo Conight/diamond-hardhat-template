@@ -1,129 +1,144 @@
 # Diamond Hardhat Template
 
-A sophisticated, production-ready template for building modular and upgradeable smart contracts using the **Diamond Standard (EIP-2535/EIP-8109)**. This project is built with **Hardhat**, **Viem**.
+A Hardhat 3 and Viem template for **ERC-8153 Facet-Based Diamonds**, built on [Perfect-Abstractions/Compose](https://github.com/Perfect-Abstractions/Compose).
 
----
+The vendored Solidity library is copied from upstream commit [`4e842c88d38a8f8ca8bdc115cecdcf23366c16e3`](https://github.com/Perfect-Abstractions/Compose/tree/4e842c88d38a8f8ca8bdc115cecdcf23366c16e3/src) (2026-09-20). Its source is kept unchanged; provenance is recorded in [`contracts/lib/upstream.json`](contracts/lib/upstream.json). Compose is still an early-stage library; this template does not constitute a security audit.
 
-## ⚠️ **Attribution & Credits**
+Credit for the core contracts and architecture belongs to **Perfect Abstractions, the Compose contributors, and [Nick Mudge](https://github.com/mudgen)**, creator of the Diamond standards. This repository supplies the Hardhat integration, custom NFT example, deployment tooling, and tests.
 
-> **IMPORTANT NOTICE:**
->
-> This project is essentially a **wrapper layer** built on top of the Diamond Standard smart contract architecture. The core implementation and foundational work are **NOT** original to this repository.
->
-> **Primary Credit Belongs To:**
->
-> 1. **[Perfect-Abstractions/Compose](https://github.com/Perfect-Abstractions/Compose)** - The primary implementation reference and architectural foundation for this template.
-> 2. **[Nick Mudge (@mudgen)](https://github.com/mudgen)** - Creator of the Diamond Standard (EIP-2535/EIP-8109) and the original Diamond implementations.
->
-> This template merely provides a **Hardhat integration layer** with deployment scripts and developer tooling around their exceptional work. All fundamental concepts, patterns, and the majority of the smart contract logic originate from the above sources.
->
-> **Please give credit where credit is due.** If you build something with this template, acknowledge the original creators.
+## Requirements
 
----
-
-## 🚀 Features
-
-- **Modular Architecture**: Fully compliant with EIP-2535 (Diamond Standard), allowing you to bypass the 24KB contract size limit and build modular systems.
-- **Automated Selector Management**: Includes a custom `selectors` task that automatically extracts and manages function selectors to prevent collisions and streamline upgrades.
-- **Smart Upgrade System**: Advanced deployment and upgrade scripts that:
-  - Perform a "diff" between local facets and the deployed Diamond.
-  - Provide a visual summary (table) of planned changes (Added/Replaced/Removed/Ignored).
-  - Require manual confirmation before executing on-chain transactions.
-- **Automated Migration**: Supports a structured migration pattern where a specific facet can execute initialization logic (e.g., setting state) during deployment or upgrade. The system automatically detects if migration is needed and includes it in the transaction.
-- **Deployment Tracking**: Automatically saves detailed deployment records (addresses, hashes, facet functions) in the `deployment/` directory.
-- **Viem Integration**: Powered by Viem for fast, lightweight, and type-safe interactions with the Ethereum blockchain.
-
-## 🛠 Project Structure
-
-- `contracts/`: Solidity source files.
-  - `lib/`: Core logic and facet base classes.
-  - `customNFT/`: Custom NFT implementation facets and diamond.
-- `scripts/`: Logic for deployment and maintenance.
-  - `libraries/diamond.ts`: The "brain" of the Diamond management system.
-  - `deploy.ts`: Initial deployment script.
-  - `upgrade.ts`: Automated upgrade script.
-- `tasks/`: Custom Hardhat tasks.
-  - `customNFT.ts`: Task for deploying and upgrading the CustomNFT Diamond.
-  - `config.ts`: Configuration for custom facets.
-  - `selectors.ts`: Logic for generating function selector mappings.
-  - `common.ts`: Common deploy & upgrade functions for diamond facets tasks.
-- `deployment/`: Network-specific deployment history.
-
-## 🏁 Getting Started
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (v18+)
-- [pnpm](https://pnpm.io/) (recommended)
-
-### Installation
+- Node.js **22.10+** (Node.js 24 LTS recommended)
+- pnpm **10.28.1**
+- Solidity 0.8.33 is downloaded by Hardhat. Both compiler profiles use the optimizer, viaIR, and the Prague EVM target, matching the upstream EVM requirement.
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
+pnpm compile
+pnpm test
+pnpm typecheck
+pnpm lint
 ```
 
-### Configuration
+## Local deployment
 
-Create a `.env` file in the root directory and add your private key and provider URLs:
-
-```env
-PRIVATE_KEY=your_private_key
-RPC_URL=your_rpc_url
-```
-
-## 📖 Usage
-
-### Compilation
+Start a persistent development chain in one terminal:
 
 ```bash
-pnpm hardhat compile
+pnpm hardhat node
 ```
 
-### Generate Selectors
-
-Before deploying or upgrading, run the selectors task to update the function mapping:
+Deploy from another terminal:
 
 ```bash
-pnpm hardhat selectors
+pnpm hardhat customNFT --deploy --network localhost
 ```
 
-### Initial Deployment
+The task executes each facet's `exportSelectors()` through a read-only `eth_call`, checks the plan, and asks for confirmation **before sending transactions**. It then deploys the facets and diamond, runs the configured migration, and saves `deployment/localhost/CustomNFTDiamond.json`.
 
-Deploys the Diamond contract along with the standard facets (`DiamondUpgradeFacet`, `DiamondInspectFacet`, `OwnerFacet`) and your custom facets.
+`LOCALHOST_RPC_URL` can override the local endpoint. For other chains, configure the network and wallet in `hardhat.config.ts` and the facet/migration configuration in `config/customNFT.ts`.
+
+Use a persistent network for deployments you intend to upgrade. The in-process `hardhatMainnet` and `hardhatOp` networks are fresh on each command. If you restart a local node, remove its obsolete deployment record before deploying again.
+
+## Facet-based upgrades
 
 ```bash
-# Scripts
-pnpm hardhat run scripts/deploy.ts --network <your-network>
-# Hardhat Tasks
-pnpm hardhat customNFT --deploy --network <your-network>
+pnpm hardhat customNFT --upgrade --network localhost
 ```
 
-### Upgrading the Diamond
+The task reads `facets()` from the diamond and checks it against the saved record. It compares deployed bytecode with the local artifacts and plans whole-facet additions, replacements, and removals. Unchanged facets are reused.
 
-The upgrade script automatically detects changes in your facets and prepares a `upgradeDiamond` transaction.
+The on-chain interface is:
+
+```solidity
+struct FacetReplacement {
+  address oldFacet;
+  address newFacet;
+}
+
+function upgradeDiamond(
+  address[] calldata addFacets,
+  FacetReplacement[] calldata replaceFacets,
+  address[] calldata removeFacets,
+  address delegate,
+  bytes calldata delegateCalldata,
+  bytes32 tag,
+  bytes calldata metadata
+) external;
+```
+
+Replacing a facet automatically adds its new selectors, reroutes retained selectors, and removes selectors no longer exported. The diamond emits `FacetAdded`, `FacetReplaced`, and `FacetRemoved` events.
+
+For a renamed facet, declare its predecessor explicitly:
+
+```ts
+return {
+  name: "CustomNFTDiamond",
+  facets: [, /* standard facets */ "CustomNFTFacetV2"],
+  replacements: { CustomNFTFacetV2: "CustomNFTFacet" },
+};
+```
+
+The mapping can remain after the replacement. Splitting or merging facets with overlapping selectors requires deliberately staged upgrades: upstream applies additions, then replacements, then removals, and rejects taking selectors from an unrelated facet.
+
+Without either flag, `pnpm hardhat customNFT --network localhost` deploys when no record exists and upgrades otherwise. `--deploy` refuses to overwrite an existing record.
+
+## Writing facets
+
+Every configured facet must implement a pure discovery function returning **packed bytes**, not `bytes4[]`:
+
+```solidity
+function exportSelectors() external pure returns (bytes memory) {
+  return bytes.concat(this.mint.selector, this.totalSupply.selector);
+}
+```
+
+Only export functions that should be callable through the diamond. Never export `exportSelectors()` itself. Selectors must be unique within each facet and across the configured diamond. Facets must have deployable, linked bytecode and require no constructor arguments.
+
+The NFT example includes the inspect and upgrade facets, separate Owner Data/Transfer/Renounce facets, ERC165, ERC721 metadata/data/transfer/approval/burn facets, and custom minting. NFT burning uses `burn(uint256)` and `burnBatch(uint256[])`. `totalSupply()` in the custom example counts tokens ever minted and does not decrease after a burn.
+
+## Migrations
+
+`CustomNFTMigrationFacet` demonstrates the migration interface:
+
+- `migrationId()`: a unique `bytes32` ID for this version.
+- `isMigrationCompleted(bytes32)`: reads the diamond's completion mapping.
+- `migrate(params)`: verifies the diamond owner and records completion after initialization.
+
+Change the ID for every new migration and add your initialization logic to `migrate`. The example parameter `mintTo` is a placeholder and the default migration does not mint tokens.
+
+The orchestrator reads the **new facet's ID**, checks it against diamond storage, and delegates directly to the selected migration facet. It supports migration-only upgrades and skips completed migrations. Facet changes and migration execute atomically in the same upgrade transaction.
+
+Initial deployment and its migration are separate transactions. The diamond address is saved before migration execution, so a failed initial migration can be retried with `--upgrade`. The migration facet is mounted automatically, and its public `migrate` entry point is owner-protected.
+
+## Selectors and frontend ABI
 
 ```bash
-# Scripts
-pnpm hardhat run scripts/upgrade.ts --network <your-network>
-# Hardhat Tasks
-pnpm hardhat customNFT --upgrade --network <your-network>
+# Optional diagnostic index; deployment does not depend on this file.
+pnpm selectors
+
+# Generate abi.ts after a successful deployment.
+pnpm generate
 ```
 
-## 💎 The Diamond Standard
+The selector index is rebuilt from actual facet exports using a simulated local chain. Interfaces and test fixtures are excluded. It is not used as an input to on-chain upgrades.
 
-This template uses the **Diamond Standard (EIP-2535)**. Diamonds are multi-facet proxies that can be extended or modified after deployment.
+Wagmi uses each deployment record's chain ID, current facet list, and exported selectors. It excludes discovery functions and unexported helpers, includes the new events, and preserves tuple overloads. Multiple chains contribute to the generated combined ABI; callers should use functions supported by their target deployment.
 
-- **Facets**: Independent contracts that implement specific functionality.
-- **Diamond**: The main contract that delegates calls to facets based on function selectors.
-- **Inspect**: A set of functions to inspect facets and their supported selectors (implemented in `DiamondInspectFacet`).
+Deployment records use version **3** with `standard: "ERC-8153"`, chain ID, active facets, exported functions, transaction details, and upgrade history. Earlier formats and ERC-8109 deployments are not supported. Old development snapshots have been removed.
 
----
+## Project layout
 
-## 📝 TODO
+- `contracts/lib/`: unchanged upstream Compose sources and provenance.
+- `contracts/customNFT/`: the custom diamond, mint facet, and example migration.
+- `contracts/test/`, `test/`: EVM integration fixtures and tests.
+- `config/`: facet and migration configuration.
+- `scripts/libraries/`: selector discovery, facet diffing, transaction execution, records, and ABI assembly.
+- `tasks/`: Hardhat deploy/upgrade and selector-index tasks.
+- `deployment/`: generated per-network deployment records.
 
-- [ ] Explore [OpenZeppelin Relayer](https://github.com/OpenZeppelin/openzeppelin-relayer) for meta-transaction support.
-- [ ] Integrate [OpenZeppelin Monitor](https://github.com/OpenZeppelin/openzeppelin-monitor) for automated contract monitoring.
+`pnpm prettier` formats project-owned code; vendored Compose files retain upstream formatting. `pnpm test` covers deployment, NFT operations, facet replacement/addition/removal, state preservation, authorization, selector conflicts, migration versions, rollback, and ABI generation.
 
-## 📜 License
+## License
 
-This project is licensed under the MIT License.
+MIT. Preserve upstream notices and attribution when redistributing the library.

@@ -1,468 +1,207 @@
-/**
- * Diamond Deployment Executor
- *
- * Handles the actual contract deployment and upgrade execution.
- */
-
 import { artifacts } from "hardhat";
 import {
+  decodeFunctionResult,
   encodeFunctionData,
+  parseAbi,
+  toFunctionSelector,
   zeroAddress,
   zeroHash,
+  type Account,
   type Address,
-  type Hash,
+  type Chain,
+  type Hex,
   type PublicClient,
+  type Transport,
+  type WalletClient,
 } from "viem";
+import { computeBytecodeHash } from "./deployment.js";
+import { facetAbi, selectorSignature, unpackSelectors } from "./selectors.js";
 import type {
   DeploymentFacet,
   DeploymentFunction,
-  FacetFunctions,
-  FacetFunctionsWithName,
-  HashString,
+  FacetArtifact,
+  FacetReplacement,
   MigrationConfig,
-  Selector,
+  OnChainFacet,
 } from "./types.js";
-import { computeBytecodeHash } from "./deployment.js";
-import type { SelectorInfo } from "./types.js";
-import * as fs from "node:fs";
-import * as path from "node:path";
 
-// ============================================================================
-// Types
-// ============================================================================
+export type DeploymentWallet = WalletClient<Transport, Chain, Account>;
+const migrationAbi = parseAbi([
+  "function migrationId() pure returns (bytes32)",
+  "function isMigrationCompleted(bytes32 id) view returns (bool)",
+]);
 
-// Hardhat's viem plugin provides its own typed wallet client
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type HardhatWalletClient = any;
-
-interface DeployedFacet {
-  readonly contractName: string;
-  readonly address: Address;
-  readonly blockNumber: bigint;
-  readonly blockHash: Hash;
-  readonly transactionHash: Hash;
-  readonly transactionIndex: number;
-  readonly from: Address;
-  readonly bytecodeHash: HashString;
-  readonly selectors: readonly Selector[];
-}
-
-interface DeployResult {
-  readonly facets: readonly DeployedFacet[];
-  readonly diamondAddress?: Address;
-  readonly diamondReceipt?: {
-    readonly blockNumber: bigint;
-    readonly blockHash: Hash;
-    readonly transactionHash: Hash;
-    readonly from: Address;
-  };
-}
-
-interface UpgradeResult {
-  readonly transactionHash: Hash;
-  readonly blockNumber: bigint;
-  readonly migrationExecuted: boolean;
-}
-
-// ============================================================================
-// Selector Lookup
-// ============================================================================
-
-// Cache for selector map - will be refreshed on each call
-let cachedSelectorMap: Record<string, SelectorInfo | undefined> | null = null;
-let cacheTimestamp = 0;
-
-// Get the directory of this file (ESM compatible)
-const currentDir = path.dirname(new URL(import.meta.url).pathname);
-
-/**
- * Get the selector map, reading from file if needed
- * Cache is refreshed if file has been modified
- */
-function getSelectorMap(): Record<string, SelectorInfo | undefined> {
-  const selectorsPath = path.join(currentDir, "selectors.json");
-
-  try {
-    const stats = fs.statSync(selectorsPath);
-    const modifiedTime = stats.mtimeMs;
-
-    // Return cached if file hasn't been modified
-    if (cachedSelectorMap && modifiedTime <= cacheTimestamp) {
-      return cachedSelectorMap;
-    }
-
-    // Read and parse the file
-    const content = fs.readFileSync(selectorsPath, "utf-8");
-    cachedSelectorMap = JSON.parse(content);
-    cacheTimestamp = modifiedTime;
-
-    return cachedSelectorMap!;
-  } catch {
-    // Return empty map if file doesn't exist
-    return {};
-  }
-}
-
-/**
- * Get selector signature from the generated selectors.json
- * This function dynamically reads the file to get the latest signatures
- */
-export function getSelectorSignature(selector: Selector): string {
-  const selectorMap = getSelectorMap();
-  return selectorMap[selector]?.signature ?? selector;
-}
-
-// ============================================================================
-// Facet Deployment
-// ============================================================================
-
-/**
- * Deploy a single facet contract
- */
-async function deployFacet(
-  publicClient: PublicClient,
-  walletClient: HardhatWalletClient,
-  contractName: string,
-  selectors: readonly Selector[],
-): Promise<DeployedFacet> {
-  const artifact = await artifacts.readArtifact(contractName);
-
-  console.log(`  - Deploying ${contractName} (${selectors.length} selectors)`);
-
-  const hash = await walletClient.deployContract({
-    abi: artifact.abi,
-    bytecode: artifact.bytecode as HashString,
-    args: [],
-  });
-
-  const receipt = await publicClient.waitForTransactionReceipt({ hash });
-
-  if (!receipt.contractAddress) {
-    throw new Error(`${contractName} deployment failed - no contract address`);
-  }
-
-  const bytecodeHash = computeBytecodeHash(
-    artifact.deployedBytecode as HashString,
-  );
-
-  console.log(`    ✓ Deployed at ${receipt.contractAddress}`);
-
-  return {
-    contractName,
-    address: receipt.contractAddress,
-    blockNumber: receipt.blockNumber,
-    blockHash: receipt.blockHash,
-    transactionHash: receipt.transactionHash,
-    transactionIndex: receipt.transactionIndex,
-    from: receipt.from,
-    bytecodeHash,
-    selectors,
-  };
-}
-
-/**
- * Deploy all facets that have changes
- */
 export async function deployFacets(
   publicClient: PublicClient,
-  walletClient: HardhatWalletClient,
-  adds: readonly FacetFunctionsWithName[],
-  replaces: readonly FacetFunctionsWithName[],
-): Promise<readonly DeployedFacet[]> {
-  // Collect unique facets that need deployment
-  const facetsToDeployMap = new Map<
-    string,
-    { contractName: string; selectors: Selector[] }
-  >();
-
-  for (const facet of [...adds, ...replaces]) {
-    const existing = facetsToDeployMap.get(facet.contractName);
-    if (existing) {
-      existing.selectors.push(...facet.selectors);
-    } else {
-      facetsToDeployMap.set(facet.contractName, {
-        contractName: facet.contractName,
-        selectors: [...facet.selectors],
-      });
-    }
-  }
-
-  console.log("\n📦 Deploying facets...");
-
-  const deployedFacets: DeployedFacet[] = [];
-
-  for (const { contractName, selectors } of facetsToDeployMap.values()) {
-    const deployed = await deployFacet(
-      publicClient,
-      walletClient,
-      contractName,
-      selectors,
+  walletClient: DeploymentWallet,
+  facets: readonly FacetArtifact[],
+): Promise<Record<string, DeploymentFacet>> {
+  const deployed: Record<string, DeploymentFacet> = {};
+  for (const facet of facets) {
+    console.log(
+      `Deploying ${facet.contractName} (${facet.selectors.length} selectors)`,
     );
-    deployedFacets.push(deployed);
+    const hash = await walletClient.deployContract({
+      abi: facet.abi,
+      bytecode: facet.bytecode,
+      args: [],
+    });
+    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+    if (receipt.status !== "success" || !receipt.contractAddress)
+      throw new Error(`Facet deployment failed: ${hash}`);
+    const packed = await publicClient.readContract({
+      address: receipt.contractAddress,
+      abi: facetAbi,
+      functionName: "exportSelectors",
+    });
+    const selectors = unpackSelectors(packed);
+    if (JSON.stringify(selectors) !== JSON.stringify(facet.selectors))
+      throw new Error(
+        `${facet.contractName}: deployed selectors differ from the approved plan`,
+      );
+    const code = await publicClient.getCode({
+      address: receipt.contractAddress,
+    });
+    if (code !== facet.deployedBytecode)
+      throw new Error(
+        `${facet.contractName}: deployed bytecode differs from artifact`,
+      );
+    deployed[facet.contractName] = {
+      address: receipt.contractAddress,
+      selectors,
+      blockNumber: receipt.blockNumber.toString(),
+      blockHash: receipt.blockHash,
+      transactionHash: hash,
+      transactionIndex: receipt.transactionIndex,
+      bytecodeHash: computeBytecodeHash(code),
+      from: receipt.from,
+    };
   }
-
-  console.log(`✅ Deployed ${deployedFacets.length} facet(s)\n`);
-
-  return deployedFacets;
+  return deployed;
 }
 
-// ============================================================================
-// Diamond Deployment
-// ============================================================================
-
-/**
- * Deploy a new Diamond contract
- */
 export async function deployDiamondContract(
   publicClient: PublicClient,
-  walletClient: HardhatWalletClient,
+  walletClient: DeploymentWallet,
   diamondName: string,
-  facetFunctions: readonly FacetFunctions[],
+  facets: readonly Address[],
   owner: Address,
-): Promise<DeployResult["diamondReceipt"] & { address: Address }> {
+) {
   const artifact = await artifacts.readArtifact(diamondName);
-
-  console.log(`\n💎 Deploying ${diamondName}...`);
-
   const hash = await walletClient.deployContract({
     abi: artifact.abi,
-    bytecode: artifact.bytecode as HashString,
-    args: [facetFunctions, owner],
+    bytecode: artifact.bytecode as Hex,
+    args: [facets, owner],
   });
-
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
-
-  if (!receipt.contractAddress) {
-    throw new Error(`${diamondName} deployment failed - no contract address`);
-  }
-
-  console.log(`✅ Diamond deployed at ${receipt.contractAddress}\n`);
-
-  return {
-    address: receipt.contractAddress,
-    blockNumber: receipt.blockNumber,
-    blockHash: receipt.blockHash,
-    transactionHash: receipt.transactionHash,
-    from: receipt.from,
-  };
+  if (receipt.status !== "success" || !receipt.contractAddress)
+    throw new Error(`Diamond deployment failed: ${hash}`);
+  return { ...receipt, address: receipt.contractAddress };
 }
 
-// ============================================================================
-// Diamond Upgrade
-// ============================================================================
+export async function readOnChainFacets(
+  publicClient: PublicClient,
+  diamond: Address,
+): Promise<readonly OnChainFacet[]> {
+  const artifact = await artifacts.readArtifact("DiamondInspectFacet");
+  return (await publicClient.readContract({
+    address: diamond,
+    abi: artifact.abi,
+    functionName: "facets",
+  })) as readonly OnChainFacet[];
+}
 
-/**
- * Execute the upgradeDiamond function on an existing diamond
- */
 export async function executeDiamondUpgrade(
   publicClient: PublicClient,
-  walletClient: HardhatWalletClient,
+  walletClient: DeploymentWallet,
   diamondAddress: Address,
-  addFunctions: readonly FacetFunctions[],
-  replaceFunctions: readonly FacetFunctions[],
-  removeFunctions: readonly Selector[],
-  delegate: Address,
-  delegateCalldata: HashString,
-  tag?: string,
-): Promise<UpgradeResult> {
-  // Get contract interface
+  addFacets: readonly Address[],
+  replaceFacets: readonly FacetReplacement[],
+  removeFacets: readonly Address[],
+  delegate: Address = zeroAddress,
+  delegateCalldata: Hex = "0x",
+  tag: Hex = zeroHash,
+) {
   const artifact = await artifacts.readArtifact("DiamondUpgradeFacet");
-
-  console.log("🔄 Executing diamond upgrade...");
-
-  const hash = await walletClient.writeContract({
+  const { request } = await publicClient.simulateContract({
+    account: walletClient.account,
     address: diamondAddress,
     abi: artifact.abi,
     functionName: "upgradeDiamond",
     args: [
-      addFunctions,
-      replaceFunctions,
-      removeFunctions,
+      addFacets,
+      replaceFacets,
+      removeFacets,
       delegate,
       delegateCalldata,
-      tag ? (tag as `0x${string}`) : zeroHash,
+      tag,
       "0x",
     ],
   });
-
+  const hash = await walletClient.writeContract(request);
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  if (receipt.status !== "success")
+    throw new Error(`Diamond upgrade reverted: ${hash}`);
+  return { ...receipt, migrationExecuted: delegate !== zeroAddress };
+}
 
-  console.log(`✅ Upgrade complete (tx: ${receipt.transactionHash})\n`);
-
+/** Check the NEW migration's ID against diamond storage, including migration-only upgrades. */
+export async function prepareMigration(
+  publicClient: PublicClient,
+  migration: MigrationConfig | undefined,
+  facets: readonly FacetArtifact[],
+  diamond?: Address,
+  onChain: readonly OnChainFacet[] = [],
+): Promise<{ willExecute: boolean; calldata: Hex }> {
+  if (!migration) return { willExecute: false, calldata: "0x" };
+  const facet = facets.find((f) => f.contractName === migration.facetName);
+  if (!facet)
+    throw new Error(`Migration facet ${migration.facetName} is not configured`);
+  const result = await publicClient.call({
+    code: facet.bytecode,
+    data: encodeFunctionData({
+      abi: migrationAbi,
+      functionName: "migrationId",
+    }),
+  });
+  if (!result.data)
+    throw new Error("Migration facet must implement migrationId()");
+  const id = decodeFunctionResult({
+    abi: migrationAbi,
+    functionName: "migrationId",
+    data: result.data,
+  });
+  const checkSelector = toFunctionSelector("isMigrationCompleted(bytes32)");
+  const canCheck = onChain.some((f) =>
+    f.functionSelectors.includes(checkSelector),
+  );
+  if (diamond && canCheck) {
+    const completed = await publicClient.readContract({
+      address: diamond,
+      abi: migrationAbi,
+      functionName: "isMigrationCompleted",
+      args: [id],
+    });
+    if (completed) return { willExecute: false, calldata: "0x" };
+  }
   return {
-    transactionHash: receipt.transactionHash,
-    blockNumber: receipt.blockNumber,
-    migrationExecuted: delegate !== zeroAddress,
+    willExecute: true,
+    calldata: encodeFunctionData({
+      abi: facet.abi,
+      functionName: "migrate",
+      args: [migration.args],
+    }),
   };
 }
 
-// ============================================================================
-// Migration
-// ============================================================================
-
-/**
- * Check if migration is already completed
- */
-export async function isMigrationCompleted(
-  publicClient: PublicClient,
-  diamondAddress: Address,
-  migrationFacetName: string,
-): Promise<boolean> {
-  try {
-    const artifact = await artifacts.readArtifact(migrationFacetName);
-    const result = await publicClient.readContract({
-      address: diamondAddress,
-      abi: artifact.abi,
-      functionName: "isMigrationCompleted",
-    });
-    return result as boolean;
-  } catch {
-    // If the function doesn't exist, assume not completed
-    return false;
-  }
-}
-
-/**
- * Encode migration calldata
- */
-export async function encodeMigrationCalldata(
-  migrationFacetName: string,
-  migrationArgs: Record<string, unknown>,
-): Promise<HashString> {
-  const artifact = await artifacts.readArtifact(migrationFacetName);
-
-  return encodeFunctionData({
-    abi: artifact.abi,
-    functionName: "migrate",
-    args: [migrationArgs],
-  });
-}
-
-/**
- * Prepare migration parameters for upgrade
- *
- * IMPORTANT: This function returns the CORRECT values:
- * - When migration NOT completed: delegate = diamondAddress, calldata = encoded migrate()
- * - When migration IS completed: delegate = zeroAddress, calldata = "0x"
- */
-export async function prepareMigration(
-  publicClient: PublicClient,
-  diamondAddress: Address,
-  migration: MigrationConfig | undefined,
-): Promise<{ delegate: Address; calldata: HashString; willExecute: boolean }> {
-  if (!migration || !migration.facetName) {
-    return { delegate: zeroAddress, calldata: "0x", willExecute: false };
-  }
-
-  const completed = await isMigrationCompleted(
-    publicClient,
-    diamondAddress,
-    migration.facetName,
-  );
-
-  if (completed) {
-    console.log(`  ⏭️  Migration already completed, skipping`);
-    return { delegate: zeroAddress, calldata: "0x", willExecute: false };
-  }
-
-  const calldata = await encodeMigrationCalldata(
-    migration.facetName,
-    migration.args,
-  );
-
-  console.log(`  🔄 Migration will execute: ${migration.facetName}`);
-
-  return { delegate: diamondAddress, calldata, willExecute: true };
-}
-
-// ============================================================================
-// Utility Functions
-// ============================================================================
-
-/**
- * Convert deployed facets to FacetFunctions array for contract calls
- */
-export function toFacetFunctions(
-  deployedFacets: readonly DeployedFacet[],
-  facetNamesWithName: readonly FacetFunctionsWithName[],
-): FacetFunctions[] {
-  const addressMap = new Map<string, Address>();
-  for (const facet of deployedFacets) {
-    addressMap.set(facet.contractName, facet.address);
-  }
-
-  return facetNamesWithName
-    .filter((f) => addressMap.has(f.contractName))
-    .map((f) => ({
-      facet: addressMap.get(f.contractName)!,
-      selectors: f.selectors,
-    }));
-}
-
-/**
- * Convert deployed facets to DeploymentFacet records
- */
-export function toDeploymentFacets(
-  deployedFacets: readonly DeployedFacet[],
-): Record<string, DeploymentFacet> {
-  const result: Record<string, DeploymentFacet> = {};
-
-  for (const facet of deployedFacets) {
-    result[facet.contractName] = {
-      address: facet.address,
-      blockNumber: facet.blockNumber.toString(),
-      blockHash: facet.blockHash,
-      transactionHash: facet.transactionHash,
-      transactionIndex: facet.transactionIndex,
-      bytecodeHash: facet.bytecodeHash,
-      from: facet.from,
-    };
-  }
-
-  return result;
-}
-
-/**
- * Build deployment function records for a deployed facet
- */
 export function buildDeploymentFunctions(
-  deployedFacets: readonly DeployedFacet[],
+  facets: readonly FacetArtifact[],
 ): DeploymentFunction[] {
-  const functions: DeploymentFunction[] = [];
-
-  for (const facet of deployedFacets) {
-    for (const selector of facet.selectors) {
-      functions.push({
-        selector,
-        signature: getSelectorSignature(selector),
-        contract: facet.contractName,
-      });
-    }
-  }
-
-  return functions;
-}
-
-/**
- * Merge existing functions with new deployments, handling replacements
- */
-export function mergeDeploymentFunctions(
-  existing: readonly DeploymentFunction[],
-  adds: readonly DeploymentFunction[],
-  replaces: readonly DeploymentFunction[],
-  removes: readonly Selector[],
-): DeploymentFunction[] {
-  const removeSet = new Set(removes);
-  const replaceMap = new Map<Selector, DeploymentFunction>();
-  for (const r of replaces) {
-    replaceMap.set(r.selector, r);
-  }
-
-  // Filter existing: remove deleted and replaced
-  const filtered = existing.filter(
-    (f) => !removeSet.has(f.selector) && !replaceMap.has(f.selector),
+  return facets.flatMap((facet) =>
+    facet.selectors.map((selector) => ({
+      selector,
+      signature: selectorSignature(facet.abi, selector),
+      contract: facet.contractName,
+    })),
   );
-
-  // Add new functions and replacements
-  return [...filtered, ...adds, ...replaces];
 }

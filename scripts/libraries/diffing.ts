@@ -1,222 +1,132 @@
-/**
- * Diamond Diffing Module
- *
- * Pure functions for computing changes between on-chain diamond state
- * and local facet artifacts.
- */
-
-import { artifacts } from "hardhat";
-import { toFunctionSelector, type Address, type PublicClient } from "viem";
-import type { Abi, AbiFunction } from "viem";
+/** Plan whole-facet operations using the diamond's actual routing table. */
+import type { Address, PublicClient } from "viem";
 import type {
   DiamondDeployment,
   DiamondDiff,
-  FacetFunctionsWithName,
-  FunctionFacetPair,
-  HashString,
-  Selector,
-  SelectorDiff,
+  ExistingFacet,
+  FacetArtifact,
+  OnChainFacet,
 } from "./types.js";
-import { zeroAddress } from "viem";
+import { assertUniqueSelectors } from "./selectors.js";
 
-// ============================================================================
-// Pure Functions for Computing Diffs
-// ============================================================================
+const key = (address: Address) => address.toLowerCase();
 
-/**
- * Extract function selectors from a contract ABI
- */
-export function extractSelectorsFromAbi(abi: Abi): Selector[] {
-  return abi
-    .filter((item): item is AbiFunction => item.type === "function")
-    .map((func) => toFunctionSelector(func) as Selector);
-}
-
-/**
- * Get function signatures from ABI (for display)
- */
-export function getAbiFunctions(abi: Abi): AbiFunction[] {
-  return abi.filter((item): item is AbiFunction => item.type === "function");
-}
-
-/**
- * Compare local bytecode with on-chain bytecode
- */
-export async function hasBytecodeChanged(
-  publicClient: PublicClient,
-  onChainAddress: Address | undefined,
-  localBytecode: HashString,
-): Promise<boolean> {
-  if (!onChainAddress) return true;
-
-  const onChainBytecode = await publicClient.getCode({
-    address: onChainAddress,
-  });
-
-  return onChainBytecode !== localBytecode;
-}
-
-/**
- * Compute the diff for a single facet contract
- */
-export async function computeFacetDiff(
-  publicClient: PublicClient,
-  contractName: string,
-  existingDeployment: DiamondDeployment | undefined,
-  onChainFacets: readonly FunctionFacetPair[] | undefined,
-): Promise<SelectorDiff> {
-  const artifact = await artifacts.readArtifact(contractName);
-  const selectors = extractSelectorsFromAbi(artifact.abi as Abi);
-  const localBytecode = artifact.deployedBytecode as HashString;
-
-  // For new deployments, all functions are adds
-  if (!existingDeployment) {
-    return {
-      contractName,
-      facet: zeroAddress,
-      add: selectors,
-      replace: [],
-      ignored: [],
-      bytecodeChanged: true,
-    };
-  }
-
-  // Check if bytecode changed
-  const deployedFacet = existingDeployment.facets[contractName];
-  const bytecodeChanged = await hasBytecodeChanged(
-    publicClient,
-    deployedFacet?.address,
-    localBytecode,
-  );
-
-  // If bytecode hasn't changed, all selectors are ignored
-  if (!bytecodeChanged) {
-    return {
-      contractName,
-      facet: deployedFacet!.address,
-      add: [],
-      replace: [],
-      ignored: selectors,
-      bytecodeChanged: false,
-    };
-  }
-
-  // Bytecode changed - categorize selectors
-  const add: Selector[] = [];
-  const replace: Selector[] = [];
-
-  for (const selector of selectors) {
-    const existsOnChain = onChainFacets?.some((p) => p.selector === selector);
-    if (existsOnChain) {
-      replace.push(selector);
-    } else {
-      add.push(selector);
+export function assertDeploymentMatchesChain(
+  deployment: DiamondDeployment,
+  onChain: readonly OnChainFacet[],
+): void {
+  const recorded = Object.values(deployment.facets);
+  if (recorded.length !== onChain.length)
+    throw new Error("Deployment record does not match on-chain facets");
+  for (const facet of recorded) {
+    const chain = onChain.find((f) => key(f.facet) === key(facet.address));
+    if (
+      !chain ||
+      chain.functionSelectors.length !== facet.selectors.length ||
+      facet.selectors.some((s, i) => s !== chain.functionSelectors[i])
+    ) {
+      throw new Error(
+        `Deployment record does not match on-chain facet ${facet.address}`,
+      );
     }
   }
-
-  return {
-    contractName,
-    facet: zeroAddress, // Will be set after deployment
-    add,
-    replace,
-    ignored: [],
-    bytecodeChanged: true,
-  };
 }
 
-/**
- * Find selectors that should be removed (exist on-chain but not in local config)
- */
-export function computeRemoved(
-  onChainFacets: readonly FunctionFacetPair[],
-  localSelectors: ReadonlySet<Selector>,
-): Selector[] {
-  return onChainFacets
-    .filter((p) => !localSelectors.has(p.selector as Selector))
-    .map((p) => p.selector as Selector);
-}
-
-/**
- * Compute complete diamond diff
- */
 export async function computeDiamondDiff(
   publicClient: PublicClient,
-  facetNames: readonly string[],
-  existingDeployment: DiamondDeployment | undefined,
-  onChainFacets: readonly FunctionFacetPair[] | undefined,
+  localFacets: readonly FacetArtifact[],
+  deployment?: DiamondDeployment,
+  onChain: readonly OnChainFacet[] = [],
+  replacements: Readonly<Record<string, string>> = {},
 ): Promise<DiamondDiff> {
-  const adds: FacetFunctionsWithName[] = [];
-  const replaces: FacetFunctionsWithName[] = [];
-  const unchanged: FacetFunctionsWithName[] = [];
-  const allLocalSelectors = new Set<Selector>();
-
-  // Process each facet
-  for (const contractName of facetNames) {
-    const diff = await computeFacetDiff(
-      publicClient,
-      contractName,
-      existingDeployment,
-      onChainFacets,
-    );
-
-    // Track all local selectors for removal detection
-    [...diff.add, ...diff.replace, ...diff.ignored].forEach((s) =>
-      allLocalSelectors.add(s),
-    );
-
-    if (diff.add.length > 0) {
-      adds.push({
-        contractName,
-        facet: diff.facet,
-        selectors: diff.add,
-      });
+  assertUniqueSelectors(localFacets);
+  if (!deployment) {
+    if (Object.keys(replacements).length)
+      throw new Error("Replacement mappings are only valid for upgrades");
+    return {
+      adds: localFacets,
+      replaces: [],
+      removes: [],
+      unchanged: [],
+      hasChanges: localFacets.length > 0,
+    };
+  }
+  assertDeploymentMatchesChain(deployment, onChain);
+  const localNames = new Set(localFacets.map((f) => f.contractName));
+  for (const name of Object.keys(replacements)) {
+    if (!localNames.has(name))
+      throw new Error(`Replacement target ${name} is not configured`);
+  }
+  const adds: FacetArtifact[] = [];
+  const replaces: { previous: ExistingFacet; next: FacetArtifact }[] = [];
+  const unchanged: ExistingFacet[] = [];
+  const retained = new Set<string>();
+  for (const next of localFacets) {
+    const mappedName = replacements[next.contractName];
+    // A rename mapping may remain in configuration after it has been applied.
+    const oldName =
+      mappedName && deployment.facets[mappedName]
+        ? mappedName
+        : next.contractName;
+    const old = deployment.facets[oldName];
+    if (replacements[next.contractName] && !old)
+      throw new Error(`Replacement source ${oldName} is not deployed`);
+    if (!old) {
+      adds.push(next);
+      continue;
     }
-
-    if (diff.replace.length > 0) {
-      replaces.push({
-        contractName,
-        facet: diff.facet,
-        selectors: diff.replace,
-      });
-    }
-
-    if (diff.ignored.length > 0) {
-      unchanged.push({
-        contractName,
-        facet: diff.facet,
-        selectors: diff.ignored,
-      });
+    if (retained.has(oldName))
+      throw new Error(`Multiple facets replace ${oldName}`);
+    retained.add(oldName);
+    const previous = {
+      contractName: oldName,
+      address: old.address,
+      selectors: old.selectors,
+    };
+    const bytecode = await publicClient.getCode({ address: old.address });
+    if (bytecode === next.deployedBytecode && oldName === next.contractName) {
+      unchanged.push(previous);
+    } else {
+      replaces.push({ previous, next });
     }
   }
+  const removes = Object.entries(deployment.facets)
+    .filter(([name]) => !retained.has(name))
+    .map(([contractName, facet]) => ({
+      contractName,
+      address: facet.address,
+      selectors: facet.selectors,
+    }));
 
-  // Find removed selectors
-  const removes = onChainFacets
-    ? computeRemoved(onChainFacets, allLocalSelectors)
-    : [];
-
-  const hasChanges =
-    adds.length > 0 || replaces.length > 0 || removes.length > 0;
-
+  // ERC-8153 applies adds, then replacements, then removals. A selector cannot
+  // move between unrelated facets in this transaction, even if its old facet is removed.
+  const owners = new Map(
+    onChain.flatMap((facet) =>
+      facet.functionSelectors.map((s) => [s, key(facet.facet)] as const),
+    ),
+  );
+  for (const next of adds) {
+    for (const selector of next.selectors) {
+      if (owners.has(selector))
+        throw new Error(
+          `${next.contractName}: selector ${selector} already exists. Use an explicit replacement or a separate removal upgrade.`,
+        );
+    }
+  }
+  for (const { previous, next } of replaces) {
+    for (const selector of next.selectors) {
+      const owner = owners.get(selector);
+      if (owner && owner !== key(previous.address))
+        throw new Error(
+          `${next.contractName}: selector ${selector} belongs to a different facet; split/merge requires staged upgrades`,
+        );
+    }
+  }
   return {
     adds,
     replaces,
     removes,
     unchanged,
-    hasChanges,
+    hasChanges: adds.length + replaces.length + removes.length > 0,
   };
-}
-
-/**
- * Get all selectors from a diff (for validation)
- */
-export function getAllSelectorsFromDiff(diff: DiamondDiff): Set<Selector> {
-  const selectors = new Set<Selector>();
-
-  for (const facet of [...diff.adds, ...diff.replaces, ...diff.unchanged]) {
-    for (const selector of facet.selectors) {
-      selectors.add(selector);
-    }
-  }
-
-  return selectors;
 }

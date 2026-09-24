@@ -39,6 +39,7 @@ export function createDiamondTask(
     taskArguments: TaskArguments,
     hre: HardhatRuntimeEnvironment,
   ): Promise<void> {
+    await hre.tasks.getTask("compile").run();
     const { viem, networkName } = await hre.network.connect();
     const config = getConfig(networkName);
 

@@ -1,12 +1,7 @@
 import hardhatToolboxViemPlugin from "@nomicfoundation/hardhat-toolbox-viem";
-import { configVariable, defineConfig, task } from "hardhat/config";
-import { bscTestnet } from "viem/chains";
+import { defineConfig, task } from "hardhat/config";
 
 const selectors = task("selectors", "Generate new selectors file")
-  .addFlag({
-    name: "overwrite",
-    description: "Overwrite the exists selectors file",
-  })
   .setAction(() => import("./tasks/selectors.js"))
   .build();
 
@@ -42,6 +37,7 @@ export default defineConfig({
       default: {
         version: "0.8.33",
         settings: {
+          evmVersion: "prague",
           optimizer: {
             enabled: true,
             runs: 999999,
@@ -52,14 +48,21 @@ export default defineConfig({
       production: {
         version: "0.8.33",
         settings: {
+          evmVersion: "prague",
           optimizer: {
-            enabled: false,
+            enabled: true,
+            runs: 999999,
           },
+          viaIR: true,
         },
       },
     },
   },
   networks: {
+    localhost: {
+      type: "http",
+      url: process.env.LOCALHOST_RPC_URL ?? "http://127.0.0.1:8545",
+    },
     hardhatMainnet: {
       type: "edr-simulated",
       chainType: "l1",

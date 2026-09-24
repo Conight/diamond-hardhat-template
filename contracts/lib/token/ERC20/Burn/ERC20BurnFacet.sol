@@ -63,7 +63,7 @@ contract ERC20BurnFacet {
      * @dev Emits a {Transfer} event to the zero address.
      * @param _value The amount of tokens to burn.
      */
-    function burnERC20(uint256 _value) external {
+    function burn(uint256 _value) external {
         ERC20Storage storage s = getStorage();
         uint256 balance = s.balanceOf[msg.sender];
         if (balance < _value) {
@@ -82,7 +82,7 @@ contract ERC20BurnFacet {
      * @param _account The address whose tokens will be burned.
      * @param _value The amount of tokens to burn.
      */
-    function burnERC20From(address _account, uint256 _value) external {
+    function burnFrom(address _account, uint256 _value) external {
         ERC20Storage storage s = getStorage();
         uint256 currentAllowance = s.allowance[_account][msg.sender];
         if (currentAllowance < _value) {
@@ -100,5 +100,14 @@ contract ERC20BurnFacet {
             s.totalSupply -= _value;
         }
         emit Transfer(_account, address(0), _value);
+    }
+
+    /**
+     * @notice Exports the function selectors of the ERC20BurnFacet
+     * @dev This function is use as a selector discovery mechanism for diamonds
+     * @return selectors The exported function selectors of the ERC20BurnFacet
+     */
+    function exportSelectors() external pure returns (bytes memory) {
+        return bytes.concat(this.burn.selector, this.burnFrom.selector);
     }
 }

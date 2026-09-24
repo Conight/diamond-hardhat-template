@@ -55,7 +55,7 @@ contract CustomNFTFacet {
         uint256 tokenId = s.totalSupply;
 
         // Mint the token
-        ERC721MintMod.mintERC721(to, tokenId);
+        ERC721MintMod.mint(to, tokenId);
 
         // Update supply (safe to use unchecked as overflow is practically impossible)
         unchecked {
@@ -69,5 +69,9 @@ contract CustomNFTFacet {
      */
     function totalSupply() external view returns (uint256) {
         return _totalSupply();
+    }
+    /// @notice Functions routed through the diamond. The discovery function itself is excluded.
+    function exportSelectors() external pure returns (bytes memory) {
+        return bytes.concat(this.mint.selector, this.totalSupply.selector);
     }
 }

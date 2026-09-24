@@ -29,7 +29,7 @@ contract ERC721BurnFacet {
     bytes32 constant STORAGE_POSITION = keccak256("erc721");
 
     /**
-     * @custom:storage-location erc8042:compose.erc721
+     * @custom:storage-location erc8042:erc721
      */
     struct ERC721Storage {
         mapping(uint256 tokenId => address owner) ownerOf;
@@ -54,7 +54,7 @@ contract ERC721BurnFacet {
      * @notice Burns (destroys) a token, removing it from enumeration tracking.
      * @param _tokenId The ID of the token to burn.
      */
-    function burnERC721(uint256 _tokenId) external {
+    function burn(uint256 _tokenId) external {
         ERC721Storage storage s = getStorage();
         address owner = s.ownerOf[_tokenId];
         if (owner == address(0)) {
@@ -77,7 +77,7 @@ contract ERC721BurnFacet {
      * @notice Burns (destroys) a token, removing it from enumeration tracking.
      * @param _tokenIds The ID of the token to burn.
      */
-    function burnERC721s(uint256[] memory _tokenIds) external {
+    function burnBatch(uint256[] memory _tokenIds) external {
         ERC721Storage storage s = getStorage();
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
@@ -97,5 +97,14 @@ contract ERC721BurnFacet {
             delete s.approved[tokenId];
             emit Transfer(owner, address(0), tokenId);
         }
+    }
+
+    /**
+     * @notice Exports the function selectors of the ERC721BurnFacet
+     * @dev This function is use as a selector discovery mechanism for diamonds
+     * @return selectors The exported function selectors of the ERC721BurnFacet
+     */
+    function exportSelectors() external pure returns (bytes memory) {
+        return bytes.concat(this.burn.selector, this.burnBatch.selector);
     }
 }

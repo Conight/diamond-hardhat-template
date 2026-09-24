@@ -20,24 +20,12 @@ contract ERC721MetadataFacet {
     bytes32 constant STORAGE_POSITION = keccak256("erc721.metadata");
 
     /**
-     * @custom:storage-location erc8042:erc721
+     * @custom:storage-location erc8042:erc721.metadata
      */
     struct ERC721MetadataStorage {
         string name;
         string symbol;
         string baseURI;
-    }
-
-    /**
-     * @notice Returns a pointer to the ERC-721 storage struct.
-     * @dev Uses inline assembly to access the storage slot defined by STORAGE_POSITION.
-     * @return s The ERC721Storage struct in storage.
-     */
-    function getStorage() internal pure returns (ERC721MetadataStorage storage s) {
-        bytes32 position = STORAGE_POSITION;
-        assembly {
-            s.slot := position
-        }
     }
 
     bytes32 constant ERC721_STORAGE_POSITION = keccak256("erc721");
@@ -57,8 +45,20 @@ contract ERC721MetadataFacet {
      * @dev Uses inline assembly to access the storage slot defined by STORAGE_POSITION.
      * @return s The ERC721Storage struct in storage.
      */
-    function getERC721Storage() internal pure returns (ERC721Storage storage s) {
+    function getStorage() internal pure returns (ERC721MetadataStorage storage s) {
         bytes32 position = STORAGE_POSITION;
+        assembly {
+            s.slot := position
+        }
+    }
+
+    /**
+     * @notice Returns a pointer to the ERC-721 storage struct.
+     * @dev Uses inline assembly to access the storage slot defined by STORAGE_POSITION.
+     * @return s The ERC721Storage struct in storage.
+     */
+    function getERC721Storage() internal pure returns (ERC721Storage storage s) {
+        bytes32 position = ERC721_STORAGE_POSITION;
         assembly {
             s.slot := position
         }
@@ -119,5 +119,14 @@ contract ERC721MetadataFacet {
             _tokenId /= 10;
         }
         return string.concat(s.baseURI, string(tokenIdString));
+    }
+
+    /**
+     * @notice Exports the function selectors of the ERC721MetadataFacet
+     * @dev This function is use as a selector discovery mechanism for diamonds
+     * @return selectors The exported function selectors of the ERC721MetadataFacet
+     */
+    function exportSelectors() external pure returns (bytes memory) {
+        return bytes.concat(this.name.selector, this.symbol.selector, this.tokenURI.selector);
     }
 }

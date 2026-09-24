@@ -24,10 +24,10 @@ event Transfer(address indexed _from, address indexed _to, uint256 indexed _toke
  */
 bytes32 constant STORAGE_POSITION = keccak256("erc721");
 
-/*
- * @custom:storage-location erc8042:erc721
+/**
  * @notice Storage layout for ERC-721 token management.
  * @dev Defines ownership, balances, approvals, and operator mappings per ERC-721 standard.
+ * @custom:storage-location erc8042:erc721
  */
 struct ERC721Storage {
     mapping(uint256 tokenId => address owner) ownerOf;
@@ -51,9 +51,10 @@ function getStorage() pure returns (ERC721Storage storage s) {
 /**
  * @notice Burns (destroys) a specific ERC-721 token.
  * @dev Reverts if the token does not exist. Clears ownership and approval.
+ *      This module does not perform approval checks. Ensure proper ownership or approval validation before calling this function.
  * @param _tokenId The ID of the token to burn.
  */
-function burnERC721(uint256 _tokenId) {
+function burn(uint256 _tokenId) {
     ERC721Storage storage s = getStorage();
     address owner = s.ownerOf[_tokenId];
     if (owner == address(0)) {

@@ -1,18 +1,9 @@
-/**
- * Diamond Library Index
- *
- * Clean re-exports for the Diamond deployment system.
- */
-
-// Main API
 export {
   deployDiamond,
   upgradeDiamond,
   deployOrUpgrade,
   loadDeployment,
 } from "./diamond.js";
-
-// Types
 export type {
   DiamondConfig,
   MigrationConfig,
@@ -20,17 +11,16 @@ export type {
   DeploymentFunction,
   DeploymentFacet,
   UpgradeRecord,
-  FacetFunctions,
+  FacetReplacement,
   Selector,
   HashString,
+  OperationOptions,
 } from "./types.js";
-
-// Utilities (for advanced usage)
 export { computeDiamondDiff } from "./diffing.js";
 export {
   deploymentExists,
   getDeploymentPath,
   saveDeployment,
 } from "./deployment.js";
-export { getSelectorSignature } from "./executor.js";
+export { inspectFacetArtifact, unpackSelectors } from "./selectors.js";
 export { confirmChanges, displayChanges } from "./prompts.js";

@@ -24,4 +24,4 @@
 .env
 
 # wagmi generated files
-abi.ts
+/abi.ts
