@@ -35,7 +35,7 @@ export default defineConfig({
   solidity: {
     profiles: {
       default: {
-        version: "0.8.37",
+        version: "0.8.38",
         settings: {
           evmVersion: "prague",
           optimizer: {
@@ -46,7 +46,7 @@ export default defineConfig({
         },
       },
       production: {
-        version: "0.8.37",
+        version: "0.8.38",
         settings: {
           evmVersion: "prague",
           optimizer: {

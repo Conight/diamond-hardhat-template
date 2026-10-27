@@ -1,4 +1,6 @@
 allowBuilds:
   esbuild: true
 minimumReleaseAgeExclude:
-  - prettier@3.9.9
+  - hardhat@3.21.1
+  - ox@0.14.59
+  - viem@2.57.12
