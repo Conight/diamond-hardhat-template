@@ -2,7 +2,7 @@
 
 A Hardhat 3 and Viem template for **ERC-8153 Facet-Based Diamonds**, built on [Perfect-Abstractions/Compose](https://github.com/Perfect-Abstractions/Compose).
 
-The vendored Solidity library is copied from upstream commit [`4e842c88d38a8f8ca8bdc115cecdcf23366c16e3`](https://github.com/Perfect-Abstractions/Compose/tree/4e842c88d38a8f8ca8bdc115cecdcf23366c16e3/src) (2026-09-20). Its source is kept unchanged; provenance is recorded in [`contracts/lib/upstream.json`](contracts/lib/upstream.json). Compose is still an early-stage library; this template does not constitute a security audit.
+The vendored Solidity library is copied from upstream commit [`8fde012d51b292136aafe6e1bbba548f8647b266`](https://github.com/Perfect-Abstractions/Compose/tree/8fde012d51b292136aafe6e1bbba548f8647b266/src) (2026-10-25, package version **0.0.7**), synchronized on 2026-10-27. Its source is kept unchanged; provenance is recorded in [`contracts/lib/upstream.json`](contracts/lib/upstream.json). Compose is still an early-stage library; this template does not constitute a security audit.
 
 Credit for the core contracts and architecture belongs to **Perfect Abstractions, the Compose contributors, and [Nick Mudge](https://github.com/mudgen)**, creator of the Diamond standards. This repository supplies the Hardhat integration, custom NFT example, deployment tooling, and tests.
 
